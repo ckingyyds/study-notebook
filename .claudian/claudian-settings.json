@@ -1,0 +1,256 @@
+{
+  "userName": "超哥",
+  "permissionMode": "yolo",
+  "model": "deepseek:deepseek-account/deepseek-flash",
+  "effortLevel": "max",
+  "serviceTier": "default",
+  "enableAutoTitleGeneration": true,
+  "titleGenerationLocale": "",
+  "titleGenerationModel": "deepseek:deepseek-account/deepseek-flash",
+  "showTabTitlesByDefault": true,
+  "chatFontScale": 95,
+  "excludedTags": [],
+  "mediaFolder": "",
+  "systemPrompt": "",
+  "sharedEnvironmentVariables": "",
+  "envSnippets": [],
+  "keyboardNavigation": {
+    "scrollUpKey": "w",
+    "scrollDownKey": "s",
+    "focusInputKey": "i"
+  },
+  "requireCommandOrControlEnterToSend": false,
+  "locale": "zh-CN",
+  "providerConfigs": {
+    "antigravity": {
+      "cliPath": "",
+      "cliPathsByHost": {},
+      "enabled": false,
+      "environmentHash": "",
+      "environmentVariables": "",
+      "modelAliases": {},
+      "preferredReasoningByModel": {},
+      "visibleModels": [],
+      "selectedModelsByHost": {}
+    },
+    "claude": {
+      "installationMethodsByHost": {},
+      "wslDistroOverridesByHost": {},
+      "enabled": false,
+      "outputStyle": null,
+      "promptSuggestions": false,
+      "discoveredOutputStyles": [
+        "default",
+        "Proactive",
+        "Explanatory",
+        "Learning"
+      ],
+      "cliPath": "",
+      "cliPathsByHost": {},
+      "loadUserSettings": true,
+      "enableChrome": false,
+      "visibleModels": [],
+      "modelAliases": {},
+      "environmentVariables": "",
+      "environmentHash": "",
+      "selectedModels": []
+    },
+    "codex": {
+      "enabled": false,
+      "safeMode": "workspace-write",
+      "cliPath": "",
+      "cliPathsByHost": {},
+      "modelAliases": {},
+      "visibleModels": [],
+      "enableUltraEffort": false,
+      "responseStyle": "pragmatic",
+      "responseVerbosity": "default",
+      "reasoningSummary": "detailed",
+      "environmentVariables": "",
+      "environmentHash": "",
+      "installationMethodsByHost": {},
+      "wslDistroOverridesByHost": {},
+      "selectedModels": []
+    },
+    "deepseek": {
+      "installationMethodsByHost": {},
+      "wslDistroOverridesByHost": {},
+      "enabled": true,
+      "codeMode": false,
+      "presetPlugins": "",
+      "cliPath": "",
+      "cliPathsByHost": {
+        "device-a2aed871f7584cfea9f4b18d933e3226adb8affa541befd2f6f783fd2528cfa2": "\"D:\\下载\\app\\dsh\""
+      },
+      "environmentVariables": "",
+      "environmentHash": "runtime-input:v1:a2b4507147ed33fb436afd8e93af7067f128ac3baae20827aca9054751fb0890",
+      "visibleModels": [
+        "deepseek:deepseek-account/deepseek-flash",
+        "deepseek:qwen-token-plan-cn/glm-5.3",
+        "deepseek:qwen-token-plan-cn/MiniMax-M2.5"
+      ],
+      "modelAliases": {},
+      "preferredReasoningByModel": {
+        "deepseek:deepseek-account/deepseek-flash": "max"
+      },
+      "selectedModels": [
+        {
+          "encodedId": "deepseek:qwen-token-plan-cn/MiniMax-M2.5",
+          "provider": "qwen-token-plan-cn",
+          "providerName": "qwen-token-plan-cn",
+          "id": "MiniMax-M2.5",
+          "label": "MiniMax-M2.5",
+          "reasoning": [
+            {
+              "id": "off",
+              "name": "Off"
+            },
+            {
+              "id": "minimal",
+              "name": "Minimal"
+            },
+            {
+              "id": "low",
+              "name": "Low"
+            },
+            {
+              "id": "medium",
+              "name": "Medium"
+            },
+            {
+              "id": "high",
+              "name": "High"
+            }
+          ],
+          "available": true
+        },
+        {
+          "encodedId": "deepseek:qwen-token-plan-cn/glm-5.3",
+          "provider": "qwen-token-plan-cn",
+          "providerName": "qwen-token-plan-cn",
+          "id": "glm-5.3",
+          "label": "GLM-5.3",
+          "reasoning": [
+            {
+              "id": "low",
+              "name": "Low"
+            },
+            {
+              "id": "high",
+              "name": "High"
+            },
+            {
+              "id": "max",
+              "name": "Max"
+            }
+          ],
+          "available": true
+        },
+        {
+          "encodedId": "deepseek:deepseek-account/deepseek-flash",
+          "provider": "deepseek-account",
+          "providerName": "DeepSeek Account",
+          "id": "deepseek-flash",
+          "label": "DeepSeek-V41-Flash",
+          "reasoning": [
+            {
+              "id": "off",
+              "name": "Off",
+              "description": "Use for simple tasks that do not need reasoning."
+            },
+            {
+              "id": "low",
+              "name": "Low",
+              "description": "Prefer for routine or latency-sensitive tasks."
+            },
+            {
+              "id": "high",
+              "name": "High",
+              "description": "The default balance for most tasks."
+            },
+            {
+              "id": "max",
+              "name": "Max",
+              "description": "Reserve for the hardest quality-first tasks."
+            }
+          ],
+          "available": true
+        }
+      ]
+    },
+    "grok": {
+      "installationMethodsByHost": {},
+      "wslDistroOverridesByHost": {},
+      "cliPath": "",
+      "cliPathsByHost": {},
+      "enabled": false,
+      "environmentHash": "",
+      "environmentVariables": "",
+      "modelAliases": {},
+      "preferredReasoningByModel": {},
+      "visibleModels": [],
+      "selectedModelsByHost": {}
+    },
+    "opencode": {
+      "installationMethodsByHost": {},
+      "wslDistroOverridesByHost": {},
+      "cliPath": "",
+      "cliPathsByHost": {},
+      "enabled": false,
+      "environmentHash": "",
+      "environmentVariables": "",
+      "modelAliases": {},
+      "preferredThinkingByModel": {},
+      "thinkingOptionsByModel": {},
+      "visibleModels": [],
+      "selectedModels": []
+    },
+    "pi": {
+      "installationMethodsByHost": {},
+      "wslDistroOverridesByHost": {},
+      "cliPath": "",
+      "cliPathsByHost": {},
+      "enabled": false,
+      "environmentHash": "",
+      "environmentVariables": "",
+      "modelAliases": {},
+      "preferredThinkingByModel": {},
+      "visibleModels": [],
+      "selectedModels": []
+    }
+  },
+  "settingsProvider": "deepseek",
+  "lastSelectedChatModel": {
+    "providerId": "deepseek",
+    "model": "deepseek:qwen-token-plan-cn/MiniMax-M2.5"
+  },
+  "inlineEditModel": null,
+  "savedProviderModel": {
+    "deepseek": "deepseek:deepseek-account/deepseek-flash"
+  },
+  "savedProviderEffort": {
+    "deepseek": "max"
+  },
+  "savedProviderServiceTier": {},
+  "savedProviderPermissionMode": {
+    "claude": "auto",
+    "deepseek": "yolo",
+    "codex": "normal"
+  },
+  "enableAutoScroll": true,
+  "deferMathRenderingDuringStreaming": true,
+  "pluginRenderedFenceLanguages": [],
+  "expandFileEditsByDefault": false,
+  "chatViewPlacement": "right-sidebar",
+  "enableZenMode": true,
+  "zenModePosition": null,
+  "enableDualPane": false,
+  "dualPaneSide": "right",
+  "restoreTabsOnStartup": true,
+  "skillsSynced": false,
+  "sessionManagerOrganization": "list",
+  "sessionManagerSort": "last-updated",
+  "sessionAutoArchiveAfter": "off",
+  "pinnedLinkedContentPaths": [],
+  "hiddenCommands": []
+}
