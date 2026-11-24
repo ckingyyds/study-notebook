@@ -84,7 +84,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 200,
+    "collapsed": true
   },
   "right": {
     "id": "ec6b0fba11e9ed7d",
@@ -224,8 +225,9 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "8b60fb8f581da0ec",
+  "active": "40fb8ea26f911339",
   "lastOpenFiles": [
+    "笔记大全(备份)/git简单使用.md",
     "最近笔记/Vue2课件.md",
     "最近笔记/VUE23项目创建.md",
     "最近笔记/django框架.md",
