@@ -295,7 +295,9 @@ hi.txt 回来了，hello.txt 的内容也回来了。**结论：只要在 git �
 
 小提醒：`reflog` 是一个单词，写成 `git ref log` 会报错（git 会提示最相似命令是 reflog）。
 
-## 三、远程仓库 Gitee/Github：建库、推送、克隆与协作
+
+
+## 四、远程仓库 Gitee/Github：建库、推送、克隆与协作
 
 ### 3.1 为什么需要远程仓库
 
@@ -461,7 +463,7 @@ fatal: destination path 'git-2617' already exists and is not an empty directory.
 
 > **GitHub 对照**：导航对应 Code / Issues / Pull requests / Actions / Projects / Wiki / Security / Settings；文件页按钮对应 Edit / Raw / Blame / History；删仓库在 Settings → Danger Zone，分支保护在 Settings → Branches。
 
-## 四、在 PyCharm 里用 Git（Gitee 插件）
+## 五、在 PyCharm 里用 Git（Gitee 插件）
 
 日常开发在 PyCharm 里进行，把 PyCharm 与 git/Gitee 集成后，拉取、更新、推送都能在工具里点几下完成。集成共四步设置（File → Settings，Ctrl+Alt+S），外加克隆与更新两个日常操作。
 
@@ -521,7 +523,7 @@ Directory 按自己的存放习惯选；建议**自己写的代码和拉取的�
 
 提交和推送也可以直接在 PyCharm 里完成：**Ctrl+K 提交（Commit）、Ctrl+Shift+K 推送（Push）**，操作与平台无关（Gitee/GitHub 通用）。本部分以命令行流程为主，此处不展开。
 
-## 五、四区流程图
+## 六、四区流程图
 
 贯穿全部内容的核心流程（建议背下来）：
 
@@ -547,7 +549,7 @@ Directory 按自己的存放习惯选；建议**自己写的代码和拉取的�
 
 远程库一列既可以是 Gitee 也可以是 GitHub：四区模型与全部命令完全一致，换个 URL 而已。
 
-## 六、命令速查
+## 七、命令速查
 
 | 命令 | 作用 | 要点 |
 |---|---|---|
