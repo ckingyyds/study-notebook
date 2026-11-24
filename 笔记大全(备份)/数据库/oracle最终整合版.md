@@ -1,13 +1,13 @@
-# MySQL(新)
+# Oracle 数据库笔记
 
-> 原文日期：9.4 ｜ 文件最后修改时间：2026/9/17 16:20:02 ｜ 合并时间：2026-10-09
 
-## 9.4 数据库入门 · 简单查询 / 限定查询 / 模糊查询 / 函数
-9.4
+## SQL 基础
+
+### 数据库入门 · 简单查询 / 限定查询 / 模糊查询 / 函数
 什么是数据库?
 统一存储和管理数据的仓库
 
-分类┌关系型数据库:Oracle,Mysql        数据的存储与管理查询
+分类┌关系型数据库:Oracle        数据的存储与管理查询
     └非关系型数据库:nosql,MongoDB   数据的传输
     
 语言:SQL语言--结构化查询语言
@@ -17,7 +17,7 @@
 --增删改查
 --查询
 
-### 一、简单查询
+#### 一、简单查询
 一:简单查询
 语法:
 ```sql
@@ -64,7 +64,7 @@ Oracle 的标识符（列别名）默认不能以数字开头，加双引号后�
 
 
 
-### 二、限定查询
+#### 二、限定查询
 二:限定查询
 ```sql
 select 要查询的内容
@@ -110,7 +110,7 @@ WHERE DEPTNO = 10  and HIREDATE >= DATE '1981-01-01' and HIREDATE < DATE '1982-0
 
 
 
-### 三、模糊查询
+#### 三、模糊查询
 三:模糊查询   特殊的限定查询
 ```sql
 select 要查询的内容
@@ -129,7 +129,7 @@ where 字段 like '匹配内容'
 
 
 
-### 四、函数
+#### 四、函数
 四:函数
 ┌系统函数┌单行函数┌数值函数
 │         │          ├字符函数
@@ -148,7 +148,7 @@ where 字段 like '匹配内容'
               └返回值的类型
 
 
-#### 数值函数
+##### 数值函数
 数值函数┌abs
         ├mod
         ├ceil
@@ -178,7 +178,7 @@ where 字段 like '匹配内容'
 8.power(数1,数2)    次方和开方    数1的数2次方
 
 
-#### 字符函数
+##### 字符函数
 字符函数┌upper
         	  ├lower
        	   ├initcap
@@ -240,7 +240,7 @@ where 字段 like '匹配内容'
 
 
 
-#### 例题：字符函数练习
+##### 例题：字符函数练习
 -- 2.将员工姓名(first_name)转成全宽,筛选出字节长度为18的员工,显示其员工编号,全宽姓名
 ```sql
 SELECT 
@@ -297,10 +297,9 @@ from emp
 
 
 
-## 9.5 转换函数 · 日期函数
-9.5
+### 转换函数 · 日期函数
 
-### 一、转换函数
+#### 一、转换函数
 转换函数   实现数据类型之间的转换
 ┌to_number(str)
 ├to_date(str,''日期格式)
@@ -405,7 +404,7 @@ SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD hh24:mi:ss') FROM DUAL;
 
 
 
-### 二、日期函数
+#### 二、日期函数
 日期函数  专门处理日期类型数据的函数
 ┌sysdate
 ├add_months
@@ -468,7 +467,9 @@ from dual
 ```sql
 SELECT NEXT_DAY(NEXT_DAY(sysdate-1, '星期日'), '星期一')
 from dual
+```
 -14就是求上周
+```sql
 SELECT NEXT_DAY(NEXT_DAY(sysdate-14, '星期日'), '星期一')
 from dual
 ```
@@ -530,7 +531,7 @@ from dual
 
 
 
-### 三、习题
+#### 三、习题
 习题
 -- 2.查询每个季度入职的人数,按照人数降序排列
 
@@ -586,8 +587,7 @@ where TO_DATE(TO_CHAR(SYSDATE, 'YYYY') || '-' || TO_CHAR(HIRE_DATE, 'MM-DD'), 'Y
 
 
 
-## 9.7 通用函数 · 聚合函数 · 分析函数
-9.7
+### 通用函数 · 聚合函数 · 分析函数
 
 ┌系统函数┌单行函数 ┌数值函数
 │        │        ├字符函数
@@ -603,7 +603,7 @@ where TO_DATE(TO_CHAR(SYSDATE, 'YYYY') || '-' || TO_CHAR(HIRE_DATE, 'MM-DD'), 'Y
 
 
 
-### 一、通用函数
+#### 一、通用函数
 一:通用函数       所有数据类型都可以使用的函数
 1.case when   相当于python中的if判断
 语法一:
@@ -613,10 +613,10 @@ case 字段 when 值1 then 返回值1
           when 值2 then 返回值2
                 ...
       [else 返回值n]
-```
           ...
           [else 返回值n]
           end  --end相当于一个结束关键字,结束这个case when判断
+```
 ```sql
 SELECT DEPTNO ,CASE DEPTNO WHEN 10 THEN '十部门'
                            WHEN 20 THEN '二十部门'
@@ -644,9 +644,7 @@ from EMP
 
 
 注意:不论case when写了多长,都只是相当于一个字段,建议加个别名
-```sql
      case when的返回值必须保证类型一致,不能第一个then是字符型,第二个then是数字型,else是日期型,不可以
-```
      这里的case when其实只是相当于值映射,并没有真的使用条件判断分支结构
      第一个语法只能对一个字段进行判断,第二个语法没有限定只能对一个字段操作
      第一个语法只能等值操作,第二个还可以用<=,>=等非等值判断
@@ -691,7 +689,7 @@ from emp
 
 
 
-### 二、聚合函数
+#### 二、聚合函数
 二:聚合函数         
 功能:将多条数据根据分组的字段,高度聚合成一条数据的过程
 语法:
@@ -785,7 +783,7 @@ order BY DEPTNO ASC
 
 
 
-### 三、分析函数（开窗函数）
+#### 三、分析函数（开窗函数）
 三:分析函数(开窗函数)
 功能:既能够显示聚合的结果又能够显示组内的明细
 函数┌max(字段)over([p o])    
@@ -822,8 +820,8 @@ from EMP
 select ename,sal,deptno,
         sum(sal)over(order by sal)
 from emp 
-sum显示的是叠加,中间如果有相同的sal,sum会显示相同
 ```
+sum显示的是叠加,中间如果有相同的sal,sum会显示相同
 再加个排序字段就行
 ```sql
 select ename,sal,deptno,
@@ -879,7 +877,7 @@ from EMP
 
 
 
-### 补充：SQL 逻辑执行顺序
+#### 补充：SQL 逻辑执行顺序
 6666666666666666666666
 SQL 语句的逻辑执行顺序大致是： 废物刚好是哦
 
@@ -890,12 +888,12 @@ GROUP BY（分组）
 HAVING（过滤分组）
 SELECT（计算表达式、定义别名）
 ORDER BY（排序）
+```
 
 GROUP BY 在第 3 步执行，而别名（级别）是在第 5 步才被定义的。所以当数据库解析到 GROUP BY 级别 时，它根本不认识 级别 这个名称（因为还没执行到 SELECT），于是报错：
 ORA-00904: "级别": invalid identifier（Oracle）或类似错误。
 
 WHERE 子句中不能直接使用窗口函数（如 AVG(SAL) OVER()），因为窗口函数是在 FROM 和 WHERE 之后、SELECT 之前计算的，逻辑顺序上不允许在 WHERE 中引用。
-```
 
 
 
@@ -950,8 +948,7 @@ WHERE 子句中不能直接使用窗口函数（如 AVG(SAL) OVER()），因为�
 
 
 
-## 9.8 数据库五大语言 · 集合运算 · 行列转换
-9.8
+### 数据库五大语言 · 集合运算 · 行列转换
 数据库五大语言┌DQL 数据库查询语言    简单查询,限定查询,模糊查询,函数...
               ├DCL 数据库控制语言    权限的赋予与回收
               ├DML 数据库管理语言    数据库的增删改(表中的数据) insert,update,delete,merge into
@@ -959,7 +956,7 @@ WHERE 子句中不能直接使用窗口函数（如 AVG(SAL) OVER()），因为�
               └TCL 事务控制语言        数据库的事务管理    ACID
                         
 
-### 一、集合运算
+#### 一、集合运算
 集合┌并集    union|union all  union是去重的并集,union all是不去重的并集
     ├交集    intersect
     └差集    minus  减去公共部分
@@ -980,10 +977,10 @@ where deptno = 20  -- deptno in (10,20)
 
 
 
-### 二、行列转换
+#### 二、行列转换
 行列转换:一维表和二维表之间的转换
 
-#### 1.行转列
+##### 1.行转列
 1.行转列    把一维表转为二维表
 推导式:
 因为一个 CASE表达式只能生成“一列”数据，而你最终的目标表需要“5列”（语文、数学、英语、历史、化学），所以必须写 5 个 CASE
@@ -1051,7 +1048,7 @@ pivot(sum(nums) for name in ('苹果' 苹果,'橘子' 橘子, '葡萄' 葡萄,'�
 
 
 
-#### 2.列转行
+##### 2.列转行
 2.列转行    把二维表转为一维表
 推导式:
 ```sql
@@ -1092,9 +1089,9 @@ pivot(sum(nums) for name in ('苹果' 苹果,'橘子' 橘子, '葡萄' 葡萄,'�
 SELECT *
 from kecheng_new
 unpivot(分数 for 科目 IN (语文,数学,英语,历史,化学))
+```
 
 UNPIVOT 要求所有被转换的列具有相同的数据类型。
-```
 而 EMP 表中的列包含字符串（ENAME, JOB）、数字（MGR, SAL, COMM, DEPTNO）、日期（HIREDATE），类型不一致。
 
 如果你希望 COMM 即使为 NULL 也显示一行（值为空或占位符），需要在 UNPIVOT 子句中加入 INCLUDE NULLS 关键字：
@@ -1160,10 +1157,9 @@ ORDER BY key;
 
 
 
-## 9.9 子查询 · 表连接
-9.9   
+### 子查询 · 表连接
 
-### 一、子查询
+#### 一、子查询
 一:子查询        查询嵌套查询
 ┌相关子查询:子查询和主查询相互依赖,子查询不能够单独执行,
             先外后内，循环执行,外层每读取一行，就把这行的值传进内层，内层针对这一行重新计算一次
@@ -1223,9 +1219,9 @@ select *
 from (select e.*, rank() over(order by sal desc) 排名
       from emp e)
 where 排名 <= 3
+```
 
 e.*可以查所有的列加上别的列
-```
 
 用子查询
 ```sql
@@ -1241,7 +1237,7 @@ where 排名 < =3
 一般不用:相关子查询放在select关键字后面叫做标量子查询又叫做性能杀手
 推荐改写成表连接
 
-相关子查询 8:51
+相关子查询
 --查询emp表中的员工姓名,工资,部门编号,部门名称,部门所在地
 deptno每查出来一条,放内层再判断一次,所以要是数据多了就不好用
 ```sql
@@ -1290,7 +1286,7 @@ where deptno = (select deptno
 
 
 
-### 二、表连接
+#### 二、表连接
 二:表连接
 定义:是用来将n张表连接成一张大表的过程,至少需要n-1个关联条件
 
@@ -1321,9 +1317,9 @@ select ename,sal,e.deptno,DNAME,LOC  --两个都有的字段要加别名确定
 from emp  e --别用as
 join dept  d
 on e.deptno = d.deptno
+```
 
 ON 和 where 不一样,on是关联条件,where是过滤条件
-```
 
 
 
@@ -1388,9 +1384,9 @@ where 关联条件
     from emp))
 ```
    从内往外写
-   代码一样,只是思路不同,9:11
+   代码一样,只是思路不同
 
-5 查询emp表每个部门的最高工资、最低工资、人数、平均工资显示(最高-最低工资)/人数的值最大的部门9:33
+5 查询emp表每个部门的最高工资、最低工资、人数、平均工资显示(最高-最低工资)/人数的值最大的部门
 
 ```sql
 with aa as (select deptno,max(sal) a,min(sal) b,count(1) c,avg(sal) d
@@ -1423,11 +1419,11 @@ WHERE d.deptno = (
         SELECT MAX(AVG(sal)) FROM emp GROUP BY deptno
     )
 );
+```
 
 
 
 in的特殊用法
-```
 8.查询职位和经理同员工SCOTT或BLAKE完全相同的员工姓名,职位,经理编号,结果不显示SCOTT和BLAKE
 
 ```sql
@@ -1505,10 +1501,9 @@ WHERE e1.HIREDATE>e2.HIREDATE
 
 
 
-## 9.10 伪列 · 树形查询 · DCL · DDL
-9.10
+### 伪列 · 树形查询 · DCL · DDL
 
-### 一、伪列（rownum / rowid / level）
+#### 一、伪列（rownum / rowid / level）
 一:伪列:创建表时默认有的字段,但是看不见隐藏起来了
 ┌rownum    行号
 ├rowid    行地址
@@ -1642,9 +1637,8 @@ connect by prior empno = mgr
 
 
 ******自己的笔记的用户管理,这一块有点构造的,建议整理的时候结合以前的笔记和d老师一起看******
-9.10伪列:meeting_04 9:45
 
-### DCL 数据库控制语言
+#### DCL 数据库控制语言
 DCL:数据库控制语言    赋权和回收权限
 ┌create
 ├delete
@@ -1666,7 +1660,7 @@ dba权限:数据库最高管理者权限
 
 
 
-### DDL 数据库定义语言
+#### DDL 数据库定义语言
 DDL        数据库定义语言      进行对象结构管理
 ┌create      创建
 ├drop        删除
@@ -1690,12 +1684,10 @@ create table emp2 as select * from emp where 1=2
 手工创建表:
 ```sql
 create table 表名 (
-```
                     字段名1 字段类型(类型长度) 约束,
                     字段名2 字段类型(类型长度) 约束,
                     字段名3 字段类型(类型长度) 约束
                     ...
-```sql
                         )
 ```
 
@@ -1726,25 +1718,34 @@ create table student(
 ```
 
 外键:
+```sql
 -- 级联删除        on delete CASCADE
 -- 级联删除为空    on delete SET NULL
 -- 不指定级联删除  on delete NO action --默认
+```
 删除父表的数据时，
 如果不指定级联删除，必须先删除子表的相关项，再删除父表的对应行
 如果指定了级联删除，子表的相关项和父表的对应行一起被删除
 如果指定了级联删除为空，父表的对应行被删除，子表的相关项还在，外键列的值变成空
 设置外键:
 后面是参考表参考字段
+```sql
 CONSTRAINT fk_1 FOREIGN KEY(deptno) REFERENCES dept(deptno) ON DELETE SET NULL;
+```
 
 
 
 2.删除表
-drop table 表名 [purge]  ┌不加purge  逻辑删除    会将表删除到回收站(user_recyclebin)
-                         └加了purge  物理删除    直接从本地文件中删除
+```sql
+drop table 表名 [purge]
+```
+┌不加purge  逻辑删除    会将表删除到回收站(user_recyclebin)
+└加了purge  物理删除    直接从本地文件中删除
 
 补充:闪回命令→从回收站收回表
+```sql
 flashback table 表名 to before drop
+```
 
 
 补充:truncate  清空表
@@ -1843,10 +1844,9 @@ drop直接删掉一张表
 
 
 
-## 9.11 视图 · 序列 · DML · TCL 事务
-9.11
+### 视图 · 序列 · DML · TCL 事务
 
-### 一、视图和序列
+#### 一、视图和序列
 一:视图和序列
 还是DDL
 --视图view            
@@ -1887,11 +1887,11 @@ FROM v2
 
 DELETE  from  v2
 where S >12000  --报错,无法删除
+```
 
 
 
 --序列 sequence
-```
 数据库中一个特殊存放等差数列的表。主要是用来提供主键值。(因为主键的要求为唯一且非空,序列肯定不为空,我们只要不循环或者控制他的循环不重复)
 
 创建序列
@@ -1932,7 +1932,7 @@ from dual
 
 
 
-### 二、DML 数据库管理语言
+#### 二、DML 数据库管理语言
 二:DML 数据库管理语言     事务管理
 ┌插入   insert
 ├更新    update
@@ -1959,10 +1959,10 @@ update emp3 set ename=lower(ename),sal=sal+10000,comm=0 where deptno != 30
 3.删除
 ```sql
 delete from 表名 [where条件]
+```
 
 
 delete和truncate的区别
-```
 ┌truncate是DDL语言(不能回滚),执行快,不能加限定条件,会降低高水位线
 └delete是DML语言(能回滚),执行慢,可以加限定条件,不会降低高水位线
 
@@ -2006,7 +2006,7 @@ truncate table emp_new;
 
 
 
-### 三、TCL 事务控制语言
+#### 三、TCL 事务控制语言
 TCL    事务控制语言
 只有dml可以可以进行事务的提交和回滚
 ┌commit        提交
@@ -2015,7 +2015,6 @@ TCL    事务控制语言
 你不需要（也不能）使用 BEGIN 或 START TRANSACTION 来手动开启事务。Oracle 事务的开启是自动的，但有明确的触发条件：
 当事务已经结束，你执行下一条可执行的 SQL 语句时，一个新事务会自动开启。这里的“可执行 SQL”主要指 DML 语句（INSERT、UPDATE、DELETE、MERGE）。如果你执行的是 SELECT 查询，则不会开启事务。
 
-MySQL：默认自动提交，想让多条语句同时成功/失败，必须显式 START TRANSACTION 来开启。
 Oracle：默认不自动提交，第一条 DML 会自动开启事务(不用START TRANSACTION)，后续 DML 自动加入同一个事务，直到你 COMMIT 或 ROLLBACK。
 
 
@@ -2084,8 +2083,7 @@ select * from emp_1
 
 
 
-## 9.12 正则（仅提及）
-9.12
+### 正则（仅提及）
 讲了一点正则
 
 
@@ -2109,12 +2107,10 @@ select * from emp_1
 
 ---
 
-# PLSQL(新2)
+## PL/SQL 编程
 
-> 原文日期：9.28 ｜ 文件最后修改时间：2026/10/9 14:02:47 ｜ 合并时间：2026-10-09
 
-## 9.28 匿名块：变量 / 判断 / 循环
- 9.28
+### 匿名块：变量 / 判断 / 循环
 plsql:流程化控制的SQL语句
 ┌变量
 ├变量赋值
@@ -2165,7 +2161,7 @@ begin
 
 
 
-### 一、变量的声明
+#### 一、变量的声明
 一:变量的声明
 变量名 类型(类型长度)
 
@@ -2178,7 +2174,7 @@ begin
         └表名.字段名%type   可以拷贝某张表的这个字段的类型,该字段类型变化时,拷贝时也会变化
 
 
-### 二、变量的赋值
+#### 二、变量的赋值
 二:变量的赋值
 1.在声明时直接赋值
 2.在执行部分(begin)进行赋值
@@ -2221,7 +2217,7 @@ end;
 
 
 
-### 三、条件判断
+#### 三、条件判断
 三:条件判断
 1.if判断
 
@@ -2272,7 +2268,7 @@ end;
 
 
 
-### 四、循环
+#### 四、循环
 四:循环
 1.loop循环
 循环的三要素 ┌初始值
@@ -2349,16 +2345,19 @@ end;
 
 3.for循环
 语法:
-for 变量 in 小值..大值 loop
 ```sql
+for 变量 in 小值..大值 loop
     end;
+```
 
 
+```sql
 begin
     for i in 1..10 loop
         dbms_output.put_line(i);
     end loop;
 end;
+```
 
 
 
@@ -2366,6 +2365,7 @@ end;
 
 
 navicat中&a的使用  [$a]
+```sql
 SELECT * FROM emp WHERE deptno = [$input];
 ```
 
@@ -2420,10 +2420,9 @@ SELECT * FROM emp WHERE deptno = [$input];
 
 
 
-## 9.29 游标 · 异常 · 有名块（函数 / 存储过程 / 索引 / 触发器 / 包）
-9.29
+### 游标 · 异常 · 有名块（函数 / 存储过程 / 索引 / 触发器 / 包）
 
-### 游标 cursor
+#### 游标 cursor
 --游标 cursor
 游标是一种能从多条记录的结果集中每次提取一条记录的机制。
 游标可以充当指针。游标能遍历结果中的所有行，但是一次只能指向一行。
@@ -2523,12 +2522,12 @@ begin
     elsif sql%found then dbms_output.put_line('删除数据,删除了'||sql%rowcount||'条数据');
     end if;
 end;
+```
 
 
 
 
 --动态游标
-```
 --动态游标
 
 和静态游标本质上是一样的,只不过动态游标select的结果集会一直变化
@@ -2585,10 +2584,10 @@ end;
 上面的都可以不用会,但是一定要会这个
 --for游标:性能消耗比动态游标大
 语法:
+```sql
 for 变量 in (select语句) loop
     循环体
 
-```sql
     end loop;
 ```
 
@@ -2607,7 +2606,7 @@ end;
 
 
 
-### 异常 exception
+#### 异常 exception
 --exception 异常
 ┌预定义异常--系统给的,有名字
 ├非预定义异常--系统给的,没名字
@@ -2623,9 +2622,9 @@ end;
 ```sql
 exception
     when 异常 then 怎么办;
+```
 
 --预定义异常（不用声明）
-```
 违反唯一性限制 dup_val_on_index
 没有找到数据   no_data_found
 返回多行       too_many_rows
@@ -2659,9 +2658,9 @@ exception
     WHEN dup_val_on_index then dbms_output.put_line('违反唯一性约束');
     when others then DBMS_OUTPUT.PUT_LINE(sqlcode||'  '||sqlerrm);
 end;
+```
 
 --非预定义异常
-```
 就是数据库系统有的异常,你给他一个新名字
 --向emp表插入一条数据;
 
@@ -2773,23 +2772,17 @@ end;
 └包
 
 
-### 自定义函数
+#### 自定义函数
 一:自定义函数
 语法:        
 ```sql
 create [or replace] function 函数名[(参数 [in]|[out] 数据类型,参数2..)] return 返回值的数据类型
 is  --理解成匿名块的declare
-```
 声明部分;
-```sql
 begin
-```
     执行部分; --一定要有return
-```sql
 exception
-```
     异常处理部分;
-```sql
   end;
 ```
 
@@ -2899,28 +2892,22 @@ END;
 
 
 
-### 存储过程
+#### 存储过程
 二:存储过程    就是没有返回值的函数
 语法:
 ```sql
 create [or replace] procedure 函数名[(参数 [in]|out,参数2..)]
 is
-```
 声明部分;
-```sql
 begin
-```
     执行部分;
-```sql
 exception
-```
     异常处理部分;
-```sql
   end;
+```
 
 
 --调用存过
-```
 ┌无参数     直接调用    call pro1()
 ├有in参数   传参调用    call pro1(参,参2..)
 └有out参数  匿名块      略
@@ -2968,9 +2955,11 @@ exception
     when err1 then raise_application_error(-20001,'请输入0-9的整数');
     when err2 then raise_application_error(-20002,'部门错误');
 end;
+```
 
 
 navicat直接运行会报错的
+```sql
 CALL pro1(2, 10);
 ```
 
@@ -3050,7 +3039,7 @@ SELECT * FROM emp_tt;
 
 
 
-### 索引
+#### 索引
 3.3.3.4 建立索引的原则
 1、有主键或者唯一约束，自动创建唯一索引
 2、在经常用作过滤的字段上建立索引
@@ -3085,7 +3074,7 @@ SELECT * FROM emp_tt;
 
 
 
-### 数据字典
+#### 数据字典
 一:数据字典(视图)        所有对象的目录
 ┌静态┌dba_*  存储了整个数据库所有的对象的信息--必须拥有管理员权限
 │    ├all_*  存储了当前用户能访问的所有对象的信息--不一定属于当前用户
@@ -3105,7 +3094,7 @@ user_tab_cols--用户所有表的所有列的属性
 user_tab_columns--用户所有表的所有列的属性
 
 
-### 动态SQL
+#### 动态SQL
 二:动态SQL
 语法:
 ```sql
@@ -3117,20 +3106,22 @@ begin
     v_sql := 'DDL';
     execute immediate v_sql;   --立即执行v_sql
   end;
+```
 
 --子句
 ·INTO 子句  从动态sql中取值
 ·USING 子句 向动态sql中传值
-```
 
 
 
 
 
-### 随机函数
+#### 随机函数
 三:随机函数
+```sql
 dbms_random.value(数1,数2)--生成数1-数2之间的随机数,默认生成小数
 dbms_random.string('格式',数)--生成随机字符串
+```
                                     └长度
 u 大写字母
 l 小写字母
@@ -3140,18 +3131,22 @@ p 可打印字符
 
 
 
-### 闪回
+#### 闪回
 四:闪回
 --闪回技术
 ┌闪回回收站中的表
 ├闪回到修改前的状态(中间没有更改表定义)
 └闪回查询
+```sql
 --闪回回收站中的表
 FLASHBACK TABLE 表名/对象名 TO BEFORE DROP RENAME TO 新表名;
+```
 
 
+```sql
 --闪回到一个时间点(时间戳)
 FLASHBACK TABLE 表名 TO TIMESTAMP 时间戳;
+```
 开启了行移动功能
 ```sql
 ALTER TABLE 表名 ENABLE/DISABLE ROW MOVEMENT;
@@ -3176,7 +3171,7 @@ WHERE 条件....
 └包
 
 
-### 触发器
+#### 触发器
 --触发器trigger
 DML触发器
 语法
@@ -3187,9 +3182,7 @@ DML操作 ON 表  [of 字段]
 [FOR EACH ROW]--默认语句级,写上是行级
 [DECLARE 声明]
 BEGIN
-```
   要执行的语句;
-```sql
 END;
 ```
 
@@ -3227,7 +3220,7 @@ END;
 
 
 
-### 包
+#### 包
 --包package
 大型项目中,有可能有很多模块,而每个模块又有自己的
 存过,函数等.而这些存过,函数,默认是放在一起的,那么
@@ -3241,13 +3234,11 @@ END;
 create or replace package 包头名
 is
 --声明
-```
 函数;
 存过;
 变量;
 游标;
 ...
-```sql
 end 包头名;
 ```
 
@@ -3256,13 +3247,11 @@ end 包头名;
 create or replace package body 包体名
 is
 --实际的内容
-```
 函数;
 存过;
 变量;
 游标;
 ...
-```sql
 end 包体名;
 ```
 
