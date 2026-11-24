@@ -207,11 +207,11 @@
             }
           }
         ],
-        "currentTab": 6
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 234.5
+    "width": 200
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -225,7 +225,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "cbc9f3fe0f0c91f2",
+  "active": "4e892992d80d7185",
   "lastOpenFiles": [
     "最近笔记/Vue2课件.md",
     "最近笔记/VUE23项目创建.md",
