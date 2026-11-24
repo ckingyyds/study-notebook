@@ -207,7 +207,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 6
       }
     ],
     "direction": "horizontal",
@@ -225,7 +225,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "40fb8ea26f911339",
+  "active": "cbc9f3fe0f0c91f2",
   "lastOpenFiles": [
     "最近笔记/Vue2课件.md",
     "最近笔记/VUE23项目创建.md",
