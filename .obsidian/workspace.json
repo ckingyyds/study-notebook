@@ -160,16 +160,6 @@
             }
           },
           {
-            "id": "1d0b0ab427e75e65",
-            "type": "leaf",
-            "state": {
-              "type": "git-view",
-              "state": {},
-              "icon": "git-pull-request",
-              "title": "Source Control"
-            }
-          },
-          {
             "id": "263ffd298a9f30f1",
             "type": "leaf",
             "state": {
@@ -182,6 +172,16 @@
               },
               "icon": "lucide-tags",
               "title": "标签"
+            }
+          },
+          {
+            "id": "1d0b0ab427e75e65",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
             }
           },
           {
@@ -199,7 +199,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 2
       }
     ],
     "direction": "horizontal",
@@ -217,7 +217,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "1d0b0ab427e75e65",
+  "active": "40fb8ea26f911339",
   "lastOpenFiles": [
     "最近笔记/assets/git4区模型.png",
     "最近笔记/git简单使用.md",
