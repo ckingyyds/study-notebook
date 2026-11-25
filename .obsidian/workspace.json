@@ -29,7 +29,7 @@
               "type": "markdown",
               "state": {
                 "file": "最近笔记/git简单使用.md",
-                "mode": "preview",
+                "mode": "source",
                 "source": false,
                 "backlinks": false
               },
@@ -199,7 +199,7 @@
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -217,7 +217,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "0b1ecd2f05858164",
+  "active": "1d0b0ab427e75e65",
   "lastOpenFiles": [
     "最近笔记/assets/git4区模型.png",
     "最近笔记/git简单使用.md",
