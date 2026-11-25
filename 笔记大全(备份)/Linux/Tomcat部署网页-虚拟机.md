@@ -107,7 +107,7 @@ ls
 
 ```bash
 cd /opt
-mv jdk1.8.0_XXX jdk8
+mv jdk1.8.0_221 jdk8
 mv apache-tomcat-8.5.100 tomcat8
 ls                # 现在应该是 jdk8 和 tomcat8 两个目录
 ```
