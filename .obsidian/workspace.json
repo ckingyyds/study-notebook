@@ -37,8 +37,7 @@
               "title": "Tomcat部署网页-虚拟机"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -117,7 +116,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "笔记大全(备份)/Linux/Tomcat部署网页-虚拟机.md",
+                "file": "笔记大全(备份)/Linux/白马Linux课程笔记.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
@@ -154,10 +153,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "d8e286fd17b97009",
+  "active": "2debe43d34c66ca6",
   "lastOpenFiles": [
-    "笔记大全(备份)/Linux/白马Linux课程笔记.md",
     "笔记大全(备份)/Linux/Tomcat部署网页-虚拟机.md",
+    "笔记大全(备份)/Linux/白马Linux课程笔记.md",
     "笔记大全(备份)/Linux/全第2章_命令与文件系统.md",
     "笔记大全(备份)/Linux/全第1章1_基础与环境搭建.md",
     "笔记大全(备份)/Linux/Linux系统软件安装.md",
