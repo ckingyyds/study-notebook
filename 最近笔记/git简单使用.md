@@ -551,6 +551,7 @@ git push -u origin "master"
 ### 4.5 关联远程：git remote add origin
 
 回到 Git Bash（本地 git-2617 目录下）执行：
+origin是别名,如果想同步到另一个仓库,不能再这这个别名
 
 ```bash
 git remote add origin https://gitee.com/classmeng/git-2617.git
@@ -614,6 +615,19 @@ To https://gitee.com/classmeng/git-2617.git
 ```
 
 `a3b894d..90e3cb8` 表示远程 master 从旧提交**前进到**新提交。刷新网页，hi.txt 内容已更新。
+
+
+补充:一文件夹想上传两个仓库
+```
+git remote add gitee https://gitee.com/ckingyyds/buy-list.git
+git remote add origin https://github.com/ckingyyds/buy-list.git
+
+git remote 
+
+
+
+
+```
 
 ### 4.8 推送前必须先更新（团队协作铁律）
 
