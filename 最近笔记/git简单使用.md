@@ -132,6 +132,9 @@ Changes to be committed:
 ```bash
 git rm --cached hello.txt
 # rm 'hello.txt'
+
+//如果是整个目录
+git rm -r --cached .
 ```
 
 `git rm --cached` **只把文件从暂存区撤下、取消跟踪，不会删除工作区的文件本身**；撤完状态又回到红色 Untracked。`add` / `rm --cached` 可以在工作区与暂存区之间来回操作——这就是暂存区给的"反悔空间"。
