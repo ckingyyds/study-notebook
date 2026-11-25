@@ -2084,8 +2084,11 @@ docker run -p 8080:80 nginx
 # 运行容器（映射多个端口）
 docker run -p 8080:80 -p 8443:443 nginx
 
+# 运行容器（映射多个端口）(后台运行)
+docker run -d -p 8080:80 -p 8443:443 nginx --name 别名
+
 # 运行容器（数据卷挂载）
-docker run -v /host/path:/container/path ubuntu
+docker run -v /host/path:/container/path ubuntu 
 
 # 运行容器（自动重启）
 docker run --restart=always nginx
