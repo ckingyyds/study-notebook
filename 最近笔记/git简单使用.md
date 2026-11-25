@@ -618,14 +618,15 @@ To https://gitee.com/classmeng/git-2617.git
 
 
 补充:一文件夹想上传两个仓库
-```
+```bash
 git remote add gitee https://gitee.com/ckingyyds/buy-list.git
 git remote add origin https://github.com/ckingyyds/buy-list.git
+#别名不能一样
 
-git remote 
+git remote -v
 
-
-
+git push origin main     # 推 GitHub
+git push gitee main      # 推 Gitee
 
 ```
 
@@ -634,7 +635,7 @@ git remote
 昨天的顺序是 `add → commit → push`，**单人开发够了，多人协作还差一步**：
 
 ```text
-正确顺序： add → commit → **pull（先更新）** → push
+正确顺序： add → commit → pull（先更新） → push
 ```
 
 **为什么**：你改代码的时候，队友可能已经改完推上去了。这时你本地和远程已经**不一致**，直接 push 会被拒。
