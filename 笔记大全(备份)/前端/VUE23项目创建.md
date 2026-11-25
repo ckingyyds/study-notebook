@@ -151,19 +151,49 @@ export default {
 | **默认端口**       | **5173**                  | **8080**                             |
 | **代码写法**       | `<script setup>` (组合式) | `export default { data() }` (选项式) |
 
+### 项目准备
+**1.下载依赖**
+下载别人的项目要先
+```bash
+pnpm install
+```
+
+如果安装时出现了Ignored build scripts: core-js@3.51.0,yorkie@2.0.0
+```bash
+pnpm approve-builds
+```
+
+下载依赖再启动,目前还下了这三个依赖
+```bash
+pnpm add axios vue-router@3 echarts
+```
+
+ **2. 安装开发依赖（只在开发时用的工具）**
+
+因为你的代码里写了 `<style scoped lang="less">`，所以必须把 `less` 相关的编译器装上，不然会报之前那个红屏错误：
+```bash
+pnpm add -D less less-loader@7
+```
+
+_(加上 `-D` 代表装到 `devDependencies` 里，表示这只是开发辅助工具，打包上线的时候不需要它。同样，`less-loader` 必须锁定 `@7` 版本才能和 Vue2 兼容。)_
 
 
-### 下载别人的项目要先pnpm install下载依赖再启动
+### 基础报错问题
 
-### jsconfig.json文件报错,加一句
+**jsconfig.json文件报错,加一句**
 
+```
 "ignoreDeprecations": "6.0",  // 👈 加上这一行
+```
 
-### 文件名有空格报错,在package.json文件的rule里面加上
+ **文件名有空格报错,在package.json文件的rule里面加上**
 
+
+```
 "vue/multi-word-component-names": "off"
+```
 
-### 文件名有空格浏览器报错,找到 **`vue.config.js`** 这个文件（如果找不到，就在根目录自己建一个）。
+**文件名有空格浏览器报错,找到 `vue.config.js` 这个文件（如果找不到，就在根目录自己建一个）。**
 
 ```js
 const { defineConfig } = require('@vue/cli-service')
@@ -173,6 +203,7 @@ module.exports = defineConfig({
   lintOnSave: false 
 })
 ```
+
 
 ### 配置框架快捷方式
 
