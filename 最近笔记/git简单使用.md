@@ -759,22 +759,9 @@ fatal: destination path 'git-2617' already exists and is not an empty directory.
 
 > **GitHub 对照**：Settings → Version Control → GitHub → + 提供 Log In via GitHub...（OAuth，浏览器授权）与 Log In with Token...（粘贴 Personal Access Token）。
 
-### 5.5 克隆仓库为项目
+### 5.5 分享新项目：Share Project on Gitee（一键推上去）
 
-**File → Project from Version Control...**（欢迎页上是 "Get from Version Control" 按钮），两种方式：
-
-- **拉自己的代码**：点左栏已登录的 **Gitee 账号**，会自动列出账号下全部仓库（列表加载需稍等），点选目标仓库即可，不用手填 URL。
-- **拉别人的代码**：左栏选 **Repository URL**，把仓库页「克隆/下载」里的 HTTPS 地址贴进 URL 框，Directory 自动变为 `目录\仓库名`。
-
-Directory 按自己的存放习惯选；建议**自己写的代码和拉取的别人代码分开放**（比如单独建一个目录存课程代码）。点 **Clone** 开始克隆——**工具背后执行的就是 `git clone` 命令**，这就是用工具和敲命令的区别：工具不用记命令，点一下就行。
-
-克隆完成弹出 Open Project 对话框，问项目怎么打开：**This Window**（关掉当前项目、在本窗口打开）/ **New Window**（新窗口）/ **Attach**（挂到已打开的项目上）。打开后项目树里就是拉下来的文件，状态栏显示当前分支 master。
-
-> **GitHub 对照**：同一个对话框，左栏点 GitHub（已登录）同样直接列出自己的仓库点选克隆，或用 Repository URL 填 GitHub 地址；Open Project 三选项完全一致。
-
-### 5.6 分享新项目：Share Project on Gitee（一键推上去）
-
-昨天讲的是"**从远程拉下来**"（克隆），这里补"**把本地项目推上去**"。
+下面讲的是"**从远程拉下来**"（克隆），这里讲"**把本地项目推上去**"。
 
 命令行要三步：远程网页建仓库 → `git remote add origin` → `git push -u`。
 PyCharm 里**一步搞定**：本地初始化 + 远程建同名仓库 + 首次推送，全自动。
@@ -798,6 +785,21 @@ PyCharm 里**一步搞定**：本地初始化 + 远程建同名仓库 + 首次�
 （私有仓库有人数上限（约 5 人），团队人多就必须开源，或者去买扩容。）
 
 > **GitHub 对照**：菜单项是 **Git → GitHub → Share Project on GitHub**（插件内置，无需安装）。对话框多一项 **Private/Public** 选择，可以直接建成公开仓库，不用像 Gitee 这样建完再改。其余流程（去勾 `.idea`、填 commit message）完全一致。
+
+
+### 5.6 克隆仓库为项目(后面都是团队协作操作)
+
+**File → Project from Version Control...**（欢迎页上是 "Get from Version Control" 按钮），两种方式：
+
+- **拉自己的代码**：点左栏已登录的 **Gitee 账号**，会自动列出账号下全部仓库（列表加载需稍等），点选目标仓库即可，不用手填 URL。
+- **拉别人的代码**：左栏选 **Repository URL**，把仓库页「克隆/下载」里的 HTTPS 地址贴进 URL 框，Directory 自动变为 `目录\仓库名`。
+
+Directory 按自己的存放习惯选；建议**自己写的代码和拉取的别人代码分开放**（比如单独建一个目录存课程代码）。点 **Clone** 开始克隆——**工具背后执行的就是 `git clone` 命令**，这就是用工具和敲命令的区别：工具不用记命令，点一下就行。
+
+克隆完成弹出 Open Project 对话框，问项目怎么打开：**This Window**（关掉当前项目、在本窗口打开）/ **New Window**（新窗口）/ **Attach**（挂到已打开的项目上）。打开后项目树里就是拉下来的文件，状态栏显示当前分支 master。
+
+> **GitHub 对照**：同一个对话框，左栏点 GitHub（已登录）同样直接列出自己的仓库点选克隆，或用 Repository URL 填 GitHub 地址；Open Project 三选项完全一致。
+
 
 ### 5.7 更新项目：Update Project
 
