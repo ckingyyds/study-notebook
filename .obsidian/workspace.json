@@ -13,13 +13,13 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "笔记大全(备份)/Linux/白马Linux课程笔记.md",
+                "file": "笔记大全(备份)/Linux/Docker.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": false
               },
               "icon": "lucide-file",
-              "title": "白马Linux课程笔记"
+              "title": "Docker"
             }
           },
           {
@@ -99,7 +99,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 200,
+    "collapsed": true
   },
   "right": {
     "id": "ec6b0fba11e9ed7d",
@@ -148,7 +149,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "笔记大全(备份)/Linux/白马Linux课程笔记.md",
+                "file": "笔记大全(备份)/Linux/Docker.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
@@ -217,6 +218,7 @@
   },
   "active": "0b1ecd2f05858164",
   "lastOpenFiles": [
+    "笔记大全(备份)/Linux/白马Linux课程笔记.md",
     "最近笔记/git简单使用.md",
     "笔记大全(备份)/Linux/全第5章_进阶实战.md",
     "笔记大全(备份)/Linux/全第6章_Nginx实战部署.md",
@@ -234,7 +236,6 @@
     "笔记大全(备份)/Linux/全第一章下_基础与环境搭建.md",
     "笔记大全(备份)/Linux/全第一章2_基础与环境搭建.md",
     "笔记大全(备份)/Linux/全第一章1_基础与环境搭建.md",
-    "笔记大全(备份)/Linux/白马Linux课程笔记.md",
     "笔记大全(备份)/Linux/全第一章上_基础与环境搭建.md",
     "最近笔记/django框架.md",
     "笔记大全(备份)/Linux/Docker.md",
