@@ -78,7 +78,7 @@ ls           # 应该能看到那两个 .tar.gz
 
 ```bash
 cd /root
-tar -xvf jdk-8uXXX-linux-x64.tar.gz
+tar -xvf jdk-8u211-linux-x64.tar.gz
 tar -xvf apache-tomcat-8.5.100.tar.gz
 ls
 ```
@@ -88,7 +88,7 @@ ls
 原始压缩包已经没用了，可以删掉：
 
 ```bash
-rm -rf jdk-8uXXX-linux-x64.tar.gz
+rm -rf jdk-8u221-linux-x64.tar.gz
 rm -rf apache-tomcat-8.5.100.tar.gz
 ```
 
@@ -97,7 +97,7 @@ rm -rf apache-tomcat-8.5.100.tar.gz
 第三方软件一般不直接扔在 `/root` 或根目录下，习惯放在 `/usr` 或 `/opt`。这里用 `/opt`。
 
 ```bash
-mv jdk1.8.0_XXX /opt/
+mv jdk1.8.0_221 /opt/
 mv apache-tomcat-8.5.100 /opt/
 cd /opt
 ls
