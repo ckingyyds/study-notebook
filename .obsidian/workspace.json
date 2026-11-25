@@ -42,7 +42,7 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false,
+                "autoReveal": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
@@ -84,8 +84,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200,
-    "collapsed": true
+    "width": 200
   },
   "right": {
     "id": "ec6b0fba11e9ed7d",
@@ -201,25 +200,25 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "0b1ecd2f05858164",
+  "active": "40fb8ea26f911339",
   "lastOpenFiles": [
-    "笔记大全(备份)/Python/Python高级笔记.md",
-    "笔记大全(备份)/Linux/Docker.md",
     "笔记大全(备份)/Linux/白马Linux课程笔记.md",
-    "最近笔记/git简单使用.md",
+    "笔记大全(备份)/Linux/Linux系统软件安装.md",
+    "笔记大全(备份)/Linux/Docker.md",
     "笔记大全(备份)/Linux/全第5章_进阶实战.md",
-    "笔记大全(备份)/Linux/全第6章_Nginx实战部署.md",
     "笔记大全(备份)/Linux/全第4章_Shell编程.md",
-    "笔记大全(备份)/Linux/全第3章_进程与服务管理.md",
     "笔记大全(备份)/Linux/全第2章_命令与文件系统.md",
+    "笔记大全(备份)/Linux/全第1章1_基础与环境搭建.md",
+    "笔记大全(备份)/Linux/全第6章_Nginx实战部署.md",
+    "笔记大全(备份)/Linux/全第3章_进程与服务管理.md",
+    "笔记大全(备份)/Linux/全第1章2_基础与环境搭建.md",
+    "笔记大全(备份)/Python/Python高级笔记.md",
+    "最近笔记/git简单使用.md",
     "笔记大全(备份)/Linux/全第二章_命令与文件系统.md",
     "笔记大全(备份)/Linux/全第六章_Nginx实战部署.md",
     "笔记大全(备份)/Linux/全第三章_进程与服务管理.md",
     "笔记大全(备份)/Linux/全第4章_进程与服务管理.md",
     "笔记大全(备份)/Linux/全第3章_Nginx实战部署.md",
-    "笔记大全(备份)/Linux/全第1章1_基础与环境搭建.md",
-    "笔记大全(备份)/Linux/全第1章2_基础与环境搭建.md",
-    "笔记大全(备份)/Linux/Linux系统软件安装.md",
     "笔记大全(备份)/Linux/全第一章下_基础与环境搭建.md",
     "笔记大全(备份)/Linux/全第一章2_基础与环境搭建.md",
     "笔记大全(备份)/Linux/全第一章1_基础与环境搭建.md",
