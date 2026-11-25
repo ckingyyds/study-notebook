@@ -1,5 +1,7 @@
 **git简单使用**
 
+github上搜索项目时前面加上awesome,大多都是优质资源,比如awesome AI
+
 Git 学习笔记：从本地仓库、分支，到 Gitee 远程仓库与团队协作，再到 PyCharm 集成。各平台操作后附简短 GitHub 对照，两边用法相通。
 
 ## 一、Git 是什么

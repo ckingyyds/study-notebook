@@ -52,8 +52,7 @@
               "title": "Docker"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -165,7 +164,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "笔记大全(备份)/Linux/Docker.md",
+                "file": "最近笔记/django框架.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
@@ -232,15 +231,15 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "88258ad7b50f2731",
+  "active": "4e892992d80d7185",
   "lastOpenFiles": [
     "最近笔记/git简单使用.md",
+    "笔记大全(备份)/Linux/Docker.md",
     "最近笔记/django框架.md",
     "最近笔记/assets/git4区模型.png",
     "笔记大全(备份)/数据库/MySQL(自学)_整合版.md",
     "最近笔记/git补充-分支与团队协作.md",
     "笔记大全(备份)/数据库/MySQL.md",
-    "笔记大全(备份)/Linux/Docker.md",
     "笔记大全(备份)/数据库/oracle最终整合版.md",
     "笔记大全(备份)/数据库/oracle笔记合并-整理版.md",
     "笔记大全(备份)/git简单使用.md",
