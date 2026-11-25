@@ -8,33 +8,18 @@
         "type": "tabs",
         "children": [
           {
-            "id": "4e892992d80d7185",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "最近笔记/django框架.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": false
-              },
-              "icon": "lucide-file",
-              "title": "django框架"
-            }
-          },
-          {
             "id": "0b1ecd2f05858164",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "最近笔记/git简单使用.md",
+                "file": "笔记大全(备份)/Linux/白马Linux课程笔记.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": false
               },
               "icon": "lucide-file",
-              "title": "git简单使用"
+              "title": "白马Linux课程笔记"
             }
           },
           {
@@ -114,8 +99,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200,
-    "collapsed": true
+    "width": 200
   },
   "right": {
     "id": "ec6b0fba11e9ed7d",
@@ -164,7 +148,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "最近笔记/django框架.md",
+                "file": "笔记大全(备份)/Linux/白马Linux课程笔记.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
@@ -231,23 +215,36 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "4e892992d80d7185",
+  "active": "0b1ecd2f05858164",
   "lastOpenFiles": [
     "最近笔记/git简单使用.md",
-    "笔记大全(备份)/Linux/Docker.md",
+    "笔记大全(备份)/Linux/全第5章_进阶实战.md",
+    "笔记大全(备份)/Linux/全第6章_Nginx实战部署.md",
+    "笔记大全(备份)/Linux/全第4章_Shell编程.md",
+    "笔记大全(备份)/Linux/全第3章_进程与服务管理.md",
+    "笔记大全(备份)/Linux/全第2章_命令与文件系统.md",
+    "笔记大全(备份)/Linux/全第二章_命令与文件系统.md",
+    "笔记大全(备份)/Linux/全第六章_Nginx实战部署.md",
+    "笔记大全(备份)/Linux/全第三章_进程与服务管理.md",
+    "笔记大全(备份)/Linux/全第4章_进程与服务管理.md",
+    "笔记大全(备份)/Linux/全第3章_Nginx实战部署.md",
+    "笔记大全(备份)/Linux/全第1章1_基础与环境搭建.md",
+    "笔记大全(备份)/Linux/全第1章2_基础与环境搭建.md",
+    "笔记大全(备份)/Linux/Linux系统软件安装.md",
+    "笔记大全(备份)/Linux/全第一章下_基础与环境搭建.md",
+    "笔记大全(备份)/Linux/全第一章2_基础与环境搭建.md",
+    "笔记大全(备份)/Linux/全第一章1_基础与环境搭建.md",
+    "笔记大全(备份)/Linux/白马Linux课程笔记.md",
+    "笔记大全(备份)/Linux/全第一章上_基础与环境搭建.md",
     "最近笔记/django框架.md",
+    "笔记大全(备份)/Linux/Docker.md",
     "最近笔记/assets/git4区模型.png",
     "笔记大全(备份)/数据库/MySQL(自学)_整合版.md",
     "最近笔记/git补充-分支与团队协作.md",
     "笔记大全(备份)/数据库/MySQL.md",
     "笔记大全(备份)/数据库/oracle最终整合版.md",
     "笔记大全(备份)/数据库/oracle笔记合并-整理版.md",
-    "笔记大全(备份)/git简单使用.md",
-    "最近笔记/Vue2课件.md",
-    "最近笔记/VUE23项目创建.md",
     "新建 文本文档.txt",
-    "最近笔记/JavaScript教程.md",
-    "最近笔记/FastAPI从入门到实战完整教程.md",
     "最近笔记/assets/image3.png",
     "最近笔记/assets/image1.png",
     "最近笔记/assets/bdd5e22178df4025f305ee1dc62cbcaf.png",
@@ -260,22 +257,10 @@
     "最近笔记/assets/image4.png",
     "最近笔记/assets",
     "assets",
-    "笔记大全(备份)/django框架.md",
-    "笔记大全(备份)/django.md",
-    "最近笔记/django.md",
-    "毕业设计/毕设选题分析讲解.md",
-    "未命名.md",
     "Django框架.docx",
-    "笔记大全(备份)/前端/html+css.md",
     "毕业设计",
     "未命名.base",
-    "2026-11-19.md",
     "未命名.canvas",
-    "笔记大全(备份)/Linux/全第一章下_基础与环境搭建.md",
-    "笔记大全(备份)/Python/Python基础笔记.md",
-    "笔记大全(备份)/Python/Python高级笔记.md",
-    "笔记大全(备份)/Python/py数分_代码块_已清理零宽字符.md",
-    "笔记大全(备份)/FastAPI从入门到实战完整教程.md",
     "笔记大全(备份)/预科班",
     "笔记大全(备份)/数据库/Mysql留到现在没有整理.txt",
     "笔记大全(备份)/数据库"
