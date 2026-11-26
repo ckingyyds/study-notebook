@@ -323,10 +323,16 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
+#原始
 @app.get("/")  #这里/表示根路径
 def root():
     return {"message": "Hello, FastAPI!"}
 
+#访问 /hello 响应结果  msg: 你好 FastAPI
+@app.get("/hello")  
+async def say_hello():  
+    return {"msg": "你好  FastAPI"}
+    
 @app.post("/items/")
 def create_item():
     return {"message": "Item created"}
@@ -335,7 +341,7 @@ def create_item():
 def update_item(item_id: int):
     return {"item_id": item_id, "message": "Item updated"}
 
-```python
+
 @app.delete("/items/{item_id}")
 def delete_item(item_id: int):
     return {"item_id": item_id, "message": "Item deleted"}
