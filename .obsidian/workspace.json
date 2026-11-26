@@ -37,7 +37,8 @@
               "title": "Docker入门与项目部署"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -116,7 +117,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "笔记大全(备份)/Linux/Docker.md",
+                "file": "笔记大全(备份)/Linux/Docker入门与项目部署.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
@@ -179,10 +180,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "d83358adf44bca76",
+  "active": "6b80b02309d50b91",
   "lastOpenFiles": [
-    "笔记大全(备份)/Linux/Docker入门与项目部署.md",
     "笔记大全(备份)/Linux/Docker.md",
+    "笔记大全(备份)/Linux/Docker入门与项目部署.md",
     "笔记大全(备份)/Linux/Tomcat部署网页-虚拟机.md",
     "最近笔记/FastAPI从入门到实战完整教程.md",
     "最近笔记/django框架.md",

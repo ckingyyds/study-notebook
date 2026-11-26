@@ -502,7 +502,10 @@ docker restart <容器ID或名字>
 
 ---
 
-## 八、下一步：用 Docker 跑一个 Tomcat（重点）
+## 八、跑起来：第一个 Tomcat 容器
+
+> **这一章做什么**：把 Tomcat 真正跑起来，并确认它没跑着跑着退出。
+> **做完会看到**：`docker ps` 里有一个 `Up` 状态的容器，但浏览器打开始终是 404 —— 这不是失败，下一章专门讲它。
 
 ### 8.1 运行容器的完整命令
 
@@ -537,6 +540,13 @@ Tomcat 在容器里跑，也是监听 8080。把宿主机的 8080 和容器的 8
 
 **冒号前面是宿主机的，后面是容器的。**
 
+**如果报 `Bind for 0.0.0.0:8080 failed: port is already allocated`：**
+
+说明宿主机的 8080 已经被别的程序占了（最常见是之前手工装过 Tomcat）。两个选择：
+
+- **图快**：把 `-p 8080:8080` 改成 `-p 8081:8080`，后面访问一律用 8081；
+- **图彻底**：翻到第十四章，把宿主机 Tomcat 和容器各分一个端口，两个都留着用。
+
 ### 8.2 运行之后检查
 
 ```bash
@@ -547,198 +557,11 @@ docker ps
 
 如果 `STATUS` 是 `Exited`，说明启动就退出了，看日志：`docker logs tomcat-01`。
 
-### 8.3 跑起来之后：这个 Tomcat 到底是哪个 Tomcat
-
-容器起来之后我顺手 `ps -ef | grep [t]omcat`，扫出来这么一条：
-
-```
-root  25079  25057  0 09:50 ?  00:00:02 /opt/java/openjdk/bin/java
-  -Djava.util.logging.config.file=/usr/local/tomcat/conf/logging.properties
-  -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
-  -Dcatalina.base=/usr/local/tomcat
-  -Dcatalina.home=/usr/local/tomcat
-  ... org.apache.catalina.startup.Bootstrap start
-```
-
-我当时愣了一下：**我 `/opt` 下装的明明是 `tomcat8`，怎么跑起来的是 `/usr/local/tomcat`？**
-
-三个证据摆出来就清楚了：
-
-| 线索 | 我装在 `/opt` 的 | 截图里这个 |
-| :--- | :--- | :--- |
-| Tomcat 路径 | `/opt/tomcat8` | `/usr/local/tomcat` |
-| JDK 路径 | `/opt/jdk8` | `/opt/java/openjdk` |
-| 运行用户 | `zyc` | `root` |
-
-`/usr/local/tomcat` 和 `/opt/java/openjdk` 是 **`tomcat:8` 镜像内部的路径**，是官方 Dockerfile 里 `ENV CATALINA_HOME=/usr/local/tomcat` 规定的。
-
-而我在宿主机上试：
-
-```bash
-ls /usr/local/tomcat
-# ls: cannot access /usr/local/tomcat: No such file or directory
-```
-
-**进程是真的，路径是假的。** 这就是容器的本质。
-
-### 8.4 为什么宿主机的 `ps` 能看到容器里的进程
-
-因为**容器不是虚拟机**。
-
-| | 虚拟机 | 容器 |
-| :--- | :--- | :--- |
-| 内核 | 自己独立的一套 | 共用宿主机的内核 |
-| 启动过程 | 完整的开机流程（BIOS→内核→systemd） | 就是 `fork` 一个进程 |
-| 隔离方式 | 硬件虚拟化 | Linux namespace |
-| 宿主机 `ps` 能看到里面吗 | 看不到 | **看得到** |
-
-容器只是宿主机上的一组普通进程，套了几层"命名空间"的视图限制：
-
-- **文件系统（mount namespace）**：容器里看是 `/usr/local/tomcat`，宿主机上实际是 `/var/lib/docker/overlay2/xxx/diff/usr/local/tomcat`
-- **网络（net namespace）**：容器里以为自己有独立的 `172.17.0.2` 网卡
-- **进程（pid namespace）**：容器里只看得到自己那几个进程，**反过来宿主机不受这个限制，全部可见**
-
-所以宿主机 `ps -ef` 一路扫下来，容器里的 java 进程也露出来了，但那条路径只在容器自己的逻辑里成立。
-
-想把视角切到容器内再看：
-
-```bash
-docker top tomcat-01
-```
-
-这条命令只列容器内部视角的进程，就干净了。
-
-### 8.5 一个端口只能有一个主人
-
-`ss -lntp | grep 8080` 最开始输出是这样的：
-
-```
-LISTEN 0 128 *:8080 *:*
-LISTEN 0 128 [::]:8080 [::]:*
-```
-
-后面本该有的 `users:(("xxx",pid=...))` 是空的。因为**占用 8080 的进程是 root 起的，我 `zyc` 号看不到别人的进程信息**。加 `sudo`：
-
-```bash
-sudo ss -lntp | grep 8080
-# LISTEN 0 128 *:8080 *:*  users:(("docker-proxy",pid=41301,fd=4))
-```
-
-真凶是 `docker-proxy`——Docker 替容器占着这个端口。
-
-那我宿主机上装的 `/opt/tomcat8` 现在是什么状态？它就算执行 `startup.sh` 也起不来：
-
-```
-SEVERE: Failed to initialize end point associated with ProtocolHandler ["http-bio-8080"]
-java.net.BindException: Address already in use
-```
-
-**一个端口同一时间只能被一个进程绑。** Docker 先占了，本机的 Tomcat 就靠边站。
-
-> 课上老师撞的是同一个现象的另一面：他 docker 里有 3 个 tomcat 容器占着 8080，本机 Tomcat 装好、`startup.sh` 也跑了，但浏览器访问到的却是容器的 404（脚注 `Apache Tomcat/8.5.100`）。后来 `docker stop` 掉那 3 个容器，本机 Tomcat 才接管 8080，页面才出来。
-
-### 8.6 想两个都要：8081 给容器，8080 给宿主机
-
-**关键规则：端口映射在 `docker run` 那一刻就定死了，之后改不了。** 没有 `docker set-port` 这种命令，`docker update` 也改不了 `-p`。
-
-想换端口，只能**删掉容器重建**。
-
-但删之前有个坑：`docker cp` 进去的项目存在于**容器的可写层**里，`docker rm` 一执行就跟着没了。所以先确认宿主机上还留着产物：
-
-```bash
-ls /home/zyc/dist
-# index.html  css  js  favicon.ico
-```
-
-然后重建，顺手改成**挂载**方式，以后重建容器项目也不会丢：
-
-```bash
-docker rm -f tomcat-01
-
-docker run -d -p 8081:8080 --name tomcat-01 \
-  -v /home/zyc/dist:/usr/local/tomcat/webapps/ROOT \
-  tomcat:8
-```
-
-`-p 8081:8080` = 宿主机 8081 → 容器 8080。
-`-v` 之后，容器里的 `webapps/ROOT` 就是宿主机的 `/home/zyc/dist`，**改宿主机上的文件，刷新浏览器就生效**。
-
-> 如果访问 8081 出来 **403 Forbidden**，是 CentOS 的 SELinux 拦的（它不允许容器访问宿主机上的普通目录）：
-> ```bash
-> sudo setenforce 0        # 临时关闭，重启后恢复
-> ```
-> 永久关闭要改 `/etc/selinux/config` 里的 `SELINUX=disabled`，然后重启系统。
-
-最后验证两个端口各归其主：
-
-```bash
-sudo ss -lntp | grep -E ':8080|:8081'
-```
-
-期望看到：
-
-```
-LISTEN 0 128  *:8081     users:(("docker-proxy",pid=41301))   ← 容器
-LISTEN 0 100 [::]:8080   users:(("java",pid=41756))           ← 宿主机 Tomcat
-```
-
-`8081` 归 `docker-proxy`、`8080` 归 `java`，分家成功。
-
-顺带把宿主机的 Tomcat 也拉起来（记得先 `source /etc/profile`，不然 `JAVA_HOME` 没有）：
-
-```bash
-source /etc/profile
-/opt/tomcat8/bin/startup.sh
-tail -f /opt/tomcat8/logs/catalina.out     # 看到 Server startup in xxx ms 才算真起来
-```
-
-### 8.7 `--restart` 是少数能"后改"的配置
-
-我想给容器加开机自启，又跑了一次 `docker run ... --restart=always`，结果报：
-
-```
-docker: Error response from daemon: Conflict. The container name "/tomcat-01"
-is already in use by container "885c5b2b3b53...". You have to remove (or rename)
-that container to be able to reuse that name.
-```
-
-占着这个名字的 `885c5b2b3b53`，就是**正在运行的那个容器**——它已经建好了，不需要再建。
-
-而且 `--restart` 根本不用重建：
-
-```bash
-docker update --restart=always tomcat-01
-```
-
-验证：
-
-```bash
-docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' tomcat-01
-# always
-```
-
-这条**立即生效，容器不用停不用删**。`docker update` 能改的是资源限制（CPU/内存）和重启策略，改不了端口映射和挂载。
-
-### 8.8 那到底该留哪个
-
-| | 宿主机手工装 | Docker |
-| :--- | :--- | :--- |
-| 装一次 | 传包 → 解压 → 挪 `/opt` → 改 `profile` → `source` → 启动，十几分钟 | `docker pull` + `docker run`，两三分钟 |
-| 换台机器 | 全部重来 | 一条命令 |
-| 装两个版本 | 改端口、改配置、环境变量打架 | 跑两个容器，各占一个端口 |
-| 弄坏了 | 手动清理目录、环境变量残留 | `docker rm` 干净利落，重建一分钟 |
-| 删干净 | 一大堆残留 | `docker rmi` 就没了 |
-| 开机自启 | 得自己写 systemd 服务 | `--restart=always` 一行搞定 |
-
-课上先用宿主机装，是为了让我知道**里面到底装了什么、为什么 Web 容器需要 JDK、环境变量为什么必须配**——这些不懂，用 Docker 就是纯黑盒。
-
-但**实际干活用 Docker**。
-
-所以 `/opt` 里那两个（`jdk8`、`tomcat8`）现在删不删都行：不删只是占 300MB 磁盘，不冲突；想删就 `rm -rf /opt/tomcat8 /opt/jdk8`，再把 `/etc/profile` 里那两行 `export` 注释掉。
-
 ---
 
 ## 九、浏览器访问出现 404——这不是错误
+
+> **这一章做什么**：搞清楚那个 404 到底是什么意思，以及打不开时按什么顺序排查。
 
 浏览器打开 `http://虚拟机IP:8080`，看到的是：
 
@@ -772,6 +595,9 @@ Apache Tomcat/8.5.100
 ---
 
 ## 十、把项目放进容器
+
+> **这一章做什么**：把宿主机上的网页放进去，让浏览器能看到内容。
+> **做完会看到**：`http://虚拟机IP:8080/mi/index.html` 出页面。
 
 项目在**宿主机**（Linux）上，Tomcat 在**容器**里，这两者之间原来没有通路。有两条路：`docker cp` 拷进去，或者 `docker exec` 进去看看再拷。
 
@@ -831,7 +657,418 @@ exit
 
 然后浏览器访问 `http://虚拟机IP:8080/mi/index.html`，页面就出来了。
 
-### 10.3 拷之前先搞清楚：Vue 项目要先 build
+---
+
+## 十一、把容器"打包"成新镜像（commit）
+
+> **这一章做什么**：把"已经装好项目的容器"固化成一个新镜像。
+> **解决什么问题**：不想每换一台机器就 `docker cp` 一遍。
+
+每次都 `docker cp` 拷一遍太麻烦，尤其是要部署到多台服务器时。
+
+**思路**：把"已经发布好项目的容器"重新打包成一个**新镜像**，以后直接运行这个新镜像，项目就在里面了。
+
+`docker commit` 只打包**容器的可写层**。如果项目是通过 `-v` 挂载进去的，文件实际还在宿主机上，不属于可写层——提交出来的镜像里 `webapps/ROOT` 会是空的。
+
+### 11.1 完整操作
+
+核心是：**再开一个不挂载的容器，用 `cp` 把文件放进去，然后对它执行 commit**。
+
+```bash
+# 1. 起一个干净的临时容器（不挂载），端口用 8082
+docker run -d -p 8082:8080 --name tomcat-cp tomcat:8
+
+# 2. 把 dist 拷进去，注意结尾的 /. 表示"拷目录里的内容"
+docker cp /home/zyc/dist/. tomcat-cp:/usr/local/tomcat/webapps/ROOT
+
+# 3. 验证一下（浏览器打开也该是购物车）
+curl -s http://localhost:8082/ | head -5
+
+# 4. 打包成新镜像
+docker commit -m "cart project" -a "zyc" tomcat-cp tomcat-cart:v1
+
+# 5. 临时容器用完就删，把 8082 腾出来
+docker rm -f tomcat-cp
+
+# 6. 用新镜像直接跑，注意：没有 -v，也没有 cp
+docker run -d -p 8082:8080 --name tomcat-cart tomcat-cart:v1
+
+# 7. 访问 IP:8082，应该直接是购物车
+```
+
+第 4 步的三个参数：
+
+| 参数 | 作用 |
+| :--- | :--- |
+| `-m "说明"` | 提交说明（message） |
+| `-a "作者"` | 作者（author） |
+| 最后两个 | **源容器** 和 **新镜像名:tag** |
+
+第 6 步就是这一节想说明的：**一条 `docker run` 就把项目带走了，不用再 `cp`。**
+
+```bash
+docker images
+# 会多出 tomcat-cart  v1  xxxxx  刚刚  4xxMB（比原来的大几MB，项目进去了）
+```
+
+### 11.2 commit 的局限（重要）
+
+| 场景 | commit 合适吗 |
+| :--- | :--- |
+| 项目已经开发完成、不再改动 | ✅ 合适，打包一次到处用 |
+| 项目还在调试，今天改完明天还要改 | ❌ 不合适，改一次就得重新 commit 一次 |
+
+所以后面还有更好的办法——**数据卷挂载**（第十三章）。
+
+---
+
+## 十二、镜像的导出与导入（save / load）
+
+> **这一章做什么**：把镜像导出成文件，搬到另一台没网的服务器上。
+
+**场景**：A 服务器有网，已经拉好了 nginx、mysql、tomcat 镜像；B 服务器没网，但也装了 Docker。怎么把镜像弄过去？
+
+**思路**：把 A 上的镜像**导出成一个本地文件**（tar 包），拷贝到 B，再**从文件导入**成镜像。
+
+### 12.1 导出（save）
+
+```bash
+docker save <镜像ID或名字> -o <文件名.tar>
+```
+
+课上实际执行：
+
+```bash
+docker save 0a2249be3d31 -o tomcat8.tar
+```
+
+- `-o` 就是 output
+- 生成的文件在当前目录下（相对路径）
+
+### 12.2 导入（load）
+
+```bash
+docker load -i <文件名.tar>
+```
+
+```bash
+docker load -i tomcat8.tar
+docker images          # tomcat:8 又回来了
+```
+
+### 12.3 commit 和 save 别搞混
+
+| 命令 | 方向 | 结果 |
+| :--- | :--- | :--- |
+| `docker commit` | **容器 → 镜像** | 把跑起来的容器固化成一个新镜像，存在 Docker 里 |
+| `docker save` | **镜像 → 本地文件** | 把镜像导出成 `.tar` 文件，可以拷 U 盘、拷到别的服务器 |
+| `docker load` | **本地文件 → 镜像** | 把 `.tar` 文件还原成镜像 |
+
+> 有了本地 tar 包做备份，以后就不用每次 `docker pull` 了，从本地 load 更快，也不怕仓库地址失效。
+
+---
+
+## 十三、数据卷挂载（-v）——最好用、也最保命的方式
+
+> **这一章做什么**：让宿主机目录和容器目录"变成同一个"，改文件刷新就生效。
+> **实际做项目时最常用的是这个**，前面的 `cp` 和 `commit` 更多是理解原理。
+
+### 13.1 commit 方式的问题
+
+- 项目还在改 → 每次改完都要 commit 一次，太蠢；
+- `docker cp` → 每发一次版拷一次，也累。
+
+### 13.2 挂载的思路
+
+**把宿主机的某个目录，和容器里的 `webapps` 目录，直接"绑"在一起。**
+
+```
+宿主机 /root/webapps  ←——同一个目录——→  容器 /usr/local/tomcat/webapps
+```
+
+以后只需要往宿主机的目录里放文件，容器里立刻就有。**改宿主机 = 改容器**。
+
+### 13.3 命令
+
+```bash
+docker run -d -p 8080:8080 --name tomcat-01 \
+  -v /root/webapps:/usr/local/tomcat/webapps \
+  tomcat:8
+```
+
+- `-v` = volume（数据卷）
+- 格式：`-v 宿主机目录:容器目录`，方向别搞反（前宿主、后容器）
+- 宿主机的目录内容会**覆盖**容器里同一路径原有的内容
+
+### 13.4 完整操作与验证
+
+**第 1 步：在宿主机准备目录，把网页放进去**
+
+```bash
+mkdir -p /root/webapps
+cp -r /opt/tomcat8/webapps/mi /root/webapps/
+ls /root/webapps
+# mi
+```
+
+（`mi` 是老师给的网页示例。没有这个目录的话，随便写一个 `index.html` 放进去效果一样；Vue 这类需要编译的项目看第十五章。）
+
+**第 2 步：删掉旧容器，用挂载方式重新起**
+
+端口和挂载都是 `docker run` 那一刻定死的，改不了，所以必须重建：
+
+```bash
+docker rm -f tomcat-01
+
+docker run -d -p 8080:8080 --name tomcat-01 \
+  -v /root/webapps:/usr/local/tomcat/webapps \
+  tomcat:8
+```
+
+> 宿主机 8080 如果已经被别的程序占着，把 `-p 8080:8080` 换成 `-p 8081:8080`，访问时端口跟着换。这个问题第十四章细讲。
+
+**第 3 步：浏览器访问**
+
+`http://虚拟机IP:8080/mi/index.html`
+
+这里挂的是整个 `webapps` 目录，所以地址里带 `mi/` 这一层；如果把目录直接挂到 `ROOT`，访问就是 `IP:8080/`。
+
+**第 4 步：在宿主机上改文件**
+
+```bash
+cd /root/webapps/mi
+
+grep -o '<title>[^<]*</title>' index.html        # 看看现在的标题
+sed -i 's#<title>.*</title>#<title>热更新成功</title>#' index.html
+grep -o '<title>[^<]*</title>' index.html        # 确认改上了
+```
+
+**第 5 步：浏览器直接刷新**
+
+没有重启容器、没有重新拷贝，标题就变了——**这就证明了，两边真的是同一个目录。**
+
+> 我自己的 Vue 购物车挂的是网站根目录：
+> ```bash
+> docker run -d -p 8081:8080 --name tomcat-01 \
+>   -v /home/zyc/dist:/usr/local/tomcat/webapps/ROOT \
+>   tomcat:8
+> ```
+> 访问 `IP:8081/` 就是首页；改完代码重新 `npm run build`，刷新即生效。
+
+### 13.5 挂载方式的好处
+
+- 改代码 / 换版本，只往宿主机目录里丢文件就行，容器不用动；
+- 多个容器可以挂载**同一个宿主机目录**，一次修改全部生效；
+- 容器删了，宿主机的文件还在，数据不会丢。
+
+> （补充）这种叫"绑定挂载"（bind mount）。Docker 还有另一种"命名卷"（`-v 卷名:容器路径`），由 Docker 管理存储位置，更适合放数据库数据。日常发布项目用绑定挂载最直观。
+
+> ⚠️ **CentOS 上的坑**：SELinux 默认 enforcing，挂载后访问会 403/404。先 `getenforce` 看状态，如果是 `Enforcing`，临时 `setenforce 0`，或者给目录打标签 `chcon -Rt svirt_sandbox_file_t /root/webapps`。
+
+---
+
+## 十四、进阶：容器到底是什么，以及我踩过的坑
+
+> ⚠️ **这一章是进阶，可以选择跳过**：只想先把流程跑通的，直接翻到第十七章的「完整流程速查」。
+> 这里回答三个问题：为什么 `ps` 能看到容器里的进程、为什么一个端口只能有一个服务、以及**我机器上已经装过 Tomcat，怎么让两个都活着**。
+
+### 14.1 跑起来之后：这个 Tomcat 到底是哪个 Tomcat
+
+容器起来之后我顺手 `ps -ef | grep [t]omcat`，扫出来这么一条：
+
+```
+root  25079  25057  0 09:50 ?  00:00:02 /opt/java/openjdk/bin/java
+  -Djava.util.logging.config.file=/usr/local/tomcat/conf/logging.properties
+  -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+  -Dcatalina.base=/usr/local/tomcat
+  -Dcatalina.home=/usr/local/tomcat
+  ... org.apache.catalina.startup.Bootstrap start
+```
+
+我当时愣了一下：**我 `/opt` 下装的明明是 `tomcat8`，怎么跑起来的是 `/usr/local/tomcat`？**
+
+三个证据摆出来就清楚了：
+
+| 线索 | 我装在 `/opt` 的 | 截图里这个 |
+| :--- | :--- | :--- |
+| Tomcat 路径 | `/opt/tomcat8` | `/usr/local/tomcat` |
+| JDK 路径 | `/opt/jdk8` | `/opt/java/openjdk` |
+| 运行用户 | `zyc` | `root` |
+
+`/usr/local/tomcat` 和 `/opt/java/openjdk` 是 **`tomcat:8` 镜像内部的路径**，是官方 Dockerfile 里 `ENV CATALINA_HOME=/usr/local/tomcat` 规定的。
+
+而我在宿主机上试：
+
+```bash
+ls /usr/local/tomcat
+# ls: cannot access /usr/local/tomcat: No such file or directory
+```
+
+**进程是真的，路径是假的。** 这就是容器的本质。
+
+### 14.2 为什么宿主机的 `ps` 能看到容器里的进程
+
+因为**容器不是虚拟机**。
+
+| | 虚拟机 | 容器 |
+| :--- | :--- | :--- |
+| 内核 | 自己独立的一套 | 共用宿主机的内核 |
+| 启动过程 | 完整的开机流程（BIOS→内核→systemd） | 就是 `fork` 一个进程 |
+| 隔离方式 | 硬件虚拟化 | Linux namespace |
+| 宿主机 `ps` 能看到里面吗 | 看不到 | **看得到** |
+
+容器只是宿主机上的一组普通进程，套了几层"命名空间"的视图限制：
+
+- **文件系统（mount namespace）**：容器里看是 `/usr/local/tomcat`，宿主机上实际是 `/var/lib/docker/overlay2/xxx/diff/usr/local/tomcat`
+- **网络（net namespace）**：容器里以为自己有独立的 `172.17.0.2` 网卡
+- **进程（pid namespace）**：容器里只看得到自己那几个进程，**反过来宿主机不受这个限制，全部可见**
+
+所以宿主机 `ps -ef` 一路扫下来，容器里的 java 进程也露出来了，但那条路径只在容器自己的逻辑里成立。
+
+想把视角切到容器内再看：
+
+```bash
+docker top tomcat-01
+```
+
+这条命令只列容器内部视角的进程，就干净了。
+
+### 14.3 一个端口只能有一个主人
+
+`ss -lntp | grep 8080` 最开始输出是这样的：
+
+```
+LISTEN 0 128 *:8080 *:*
+LISTEN 0 128 [::]:8080 [::]:*
+```
+
+后面本该有的 `users:(("xxx",pid=...))` 是空的。因为**占用 8080 的进程是 root 起的，我 `zyc` 号看不到别人的进程信息**。加 `sudo`：
+
+```bash
+sudo ss -lntp | grep 8080
+# LISTEN 0 128 *:8080 *:*  users:(("docker-proxy",pid=41301,fd=4))
+```
+
+真凶是 `docker-proxy`——Docker 替容器占着这个端口。
+
+那我宿主机上装的 `/opt/tomcat8` 现在是什么状态？它就算执行 `startup.sh` 也起不来：
+
+```
+SEVERE: Failed to initialize end point associated with ProtocolHandler ["http-bio-8080"]
+java.net.BindException: Address already in use
+```
+
+**一个端口同一时间只能被一个进程绑。** Docker 先占了，本机的 Tomcat 就靠边站。
+
+> 课上老师撞的是同一个现象的另一面：他 docker 里有 3 个 tomcat 容器占着 8080，本机 Tomcat 装好、`startup.sh` 也跑了，但浏览器访问到的却是容器的 404（脚注 `Apache Tomcat/8.5.100`）。后来 `docker stop` 掉那 3 个容器，本机 Tomcat 才接管 8080，页面才出来。
+
+### 14.4 想两个都要：8081 给容器，8080 给宿主机
+
+**关键规则：端口映射在 `docker run` 那一刻就定死了，之后改不了。** 没有 `docker set-port` 这种命令，`docker update` 也改不了 `-p`。
+
+想换端口，只能**删掉容器重建**。
+
+但删之前有个坑：`docker cp` 进去的项目存在于**容器的可写层**里，`docker rm` 一执行就跟着没了。所以先确认宿主机上还留着产物：
+
+```bash
+ls /home/zyc/dist
+# index.html  css  js  favicon.ico
+```
+
+然后重建，顺手改成**挂载**方式，以后重建容器项目也不会丢：
+
+```bash
+docker rm -f tomcat-01
+
+docker run -d -p 8081:8080 --name tomcat-01 \
+  -v /home/zyc/dist:/usr/local/tomcat/webapps/ROOT \
+  tomcat:8
+```
+
+`-p 8081:8080` = 宿主机 8081 → 容器 8080。
+`-v` 之后，容器里的 `webapps/ROOT` 就是宿主机的 `/home/zyc/dist`，**改宿主机上的文件，刷新浏览器就生效**。
+
+> 如果访问 8081 出来 **403 Forbidden**，是 CentOS 的 SELinux 拦的（它不允许容器访问宿主机上的普通目录）：
+> ```bash
+> sudo setenforce 0        # 临时关闭，重启后恢复
+> ```
+> 永久关闭要改 `/etc/selinux/config` 里的 `SELINUX=disabled`，然后重启系统。
+
+最后验证两个端口各归其主：
+
+```bash
+sudo ss -lntp | grep -E ':8080|:8081'
+```
+
+期望看到：
+
+```
+LISTEN 0 128  *:8081     users:(("docker-proxy",pid=41301))   ← 容器
+LISTEN 0 100 [::]:8080   users:(("java",pid=41756))           ← 宿主机 Tomcat
+```
+
+`8081` 归 `docker-proxy`、`8080` 归 `java`，分家成功。
+
+顺带把宿主机的 Tomcat 也拉起来（记得先 `source /etc/profile`，不然 `JAVA_HOME` 没有）：
+
+```bash
+source /etc/profile
+/opt/tomcat8/bin/startup.sh
+tail -f /opt/tomcat8/logs/catalina.out     # 看到 Server startup in xxx ms 才算真起来
+```
+
+### 14.5 `--restart` 是少数能"后改"的配置
+
+我想给容器加开机自启，又跑了一次 `docker run ... --restart=always`，结果报：
+
+```
+docker: Error response from daemon: Conflict. The container name "/tomcat-01"
+is already in use by container "885c5b2b3b53...". You have to remove (or rename)
+that container to be able to reuse that name.
+```
+
+占着这个名字的 `885c5b2b3b53`，就是**正在运行的那个容器**——它已经建好了，不需要再建。
+
+而且 `--restart` 根本不用重建：
+
+```bash
+docker update --restart=always tomcat-01
+```
+
+验证：
+
+```bash
+docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' tomcat-01
+# always
+```
+
+这条**立即生效，容器不用停不用删**。`docker update` 能改的是资源限制（CPU/内存）和重启策略，改不了端口映射和挂载。
+
+### 14.6 那到底该留哪个
+
+| | 宿主机手工装 | Docker |
+| :--- | :--- | :--- |
+| 装一次 | 传包 → 解压 → 挪 `/opt` → 改 `profile` → `source` → 启动，十几分钟 | `docker pull` + `docker run`，两三分钟 |
+| 换台机器 | 全部重来 | 一条命令 |
+| 装两个版本 | 改端口、改配置、环境变量打架 | 跑两个容器，各占一个端口 |
+| 弄坏了 | 手动清理目录、环境变量残留 | `docker rm` 干净利落，重建一分钟 |
+| 删干净 | 一大堆残留 | `docker rmi` 就没了 |
+| 开机自启 | 得自己写 systemd 服务 | `--restart=always` 一行搞定 |
+
+课上先用宿主机装，是为了让我知道**里面到底装了什么、为什么 Web 容器需要 JDK、环境变量为什么必须配**——这些不懂，用 Docker 就是纯黑盒。
+
+但**实际干活用 Docker**。
+
+所以 `/opt` 里那两个（`jdk8`、`tomcat8`）现在删不删都行：不删只是占 300MB 磁盘，不冲突；想删就 `rm -rf /opt/tomcat8 /opt/jdk8`，再把 `/etc/profile` 里那两行 `export` 注释掉。
+
+---
+
+## 十五、前端项目（Vue）怎么放进容器
+
+> ⚠️ **这一章是专项，只跟前端项目有关**：只讲 Vue / React 这类**需要编译**的项目怎么放进容器。
+> 如果你的项目就是普通网页（html + css + js），第十章的做法已经够用了，可以跳过。
+
+### 15.1 拷之前先搞清楚：Vue 项目要先 build
 
 前面拷的 `mi` 是老师做好的静态网页（已经是 html + 图片），拷进去就能用。
 
@@ -854,7 +1091,7 @@ exit
 
 所以那句话的准确说法是：**不是 Vue 项目跑不了，是源码跑不了；编译产物跑得很好，跟老师的 `mi` 网页没有任何区别。**
 
-### 10.4 一个必踩的坑：publicPath
+### 15.2 一个必踩的坑：publicPath
 
 我的 `vue.config.js` 里什么都没配：
 
@@ -894,7 +1131,7 @@ module.exports = defineConfig({
 
 **省事的办法是直接放 `ROOT`**，代码一个字都不用改。
 
-### 10.5 实战：build → 传 → cp → 访问
+### 15.3 实战：build → 传 → cp → 访问
 
 **第一步：在哪儿 build**
 
@@ -973,7 +1210,7 @@ http://虚拟机IP:8080/
 
 购物车页面就出来了。
 
-### 10.6 踩坑：pnpm 装的 node_modules 是假的
+### 15.4 踩坑：pnpm 装的 node_modules 是假的
 
 第一次 build 直接失败：
 
@@ -1004,7 +1241,7 @@ npm install --registry=https://registry.npmmirror.com
 
 **教训**：一个项目别混用包管理器。我那个目录里 `package-lock.json`（npm 的）和 `pnpm-lock.yaml`（pnpm 的）两个都在——两种锁文件打架，出这种事只是迟早的。选定一个，把另一个删掉。
 
-### 10.7 整条链路串起来
+### 15.5 整条链路串起来
 
 ```
 写代码（.vue / .js / .css）
@@ -1018,192 +1255,11 @@ npm install --registry=https://registry.npmmirror.com
 
 课上老师打包的是"米"网页，我打包的是购物车——**流程一模一样**。
 
-这也是为什么下一节 `docker commit` 有用：把"已经放好项目的容器"直接固化成镜像，换台机器 `docker run` 就起来了，连 `docker cp` 都省了。
+这就是第十一章 `docker commit` 的用途：把"已经放好项目的容器"直接固化成镜像，换台机器 `docker run` 就起来了，连 `docker cp` 都省了。
 
 ---
 
-## 十一、把容器"打包"成新镜像（commit）
-
-每次都 `docker cp` 拷一遍太麻烦，尤其是要部署到多台服务器时。
-
-**思路**：把"已经发布好项目的容器"重新打包成一个**新镜像**，以后直接运行这个新镜像，项目就在里面了。
-
-因为你当前的 `tomcat-01` 是通过 `-v` 挂载的，而 `docker commit` 只打包容器的**可写层**，挂载进去的目录属于宿主机，不会被写进镜像中。所以这样提交时，`webapps/ROOT` 在镜像里会是空的。我们创个新容器解决
-
-核心是：**再开一个不挂载的容器，用 `cp` 把文件放进去，然后对它执行 commit**。
-
-
-```bash
-# 1. 起一个干净的临时容器（不挂载），端口用 8082
-docker run -d -p 8082:8080 --name tomcat-cp tomcat:8
-
-# 2. 把 dist 拷进去，注意结尾的 /. 表示"拷目录里的内容"
-docker cp /home/zyc/dist/. tomcat-cp:/usr/local/tomcat/webapps/ROOT
-
-# 3. 验证一下（浏览器打开也该是购物车）
-curl -s http://localhost:8082/ | head -5
-
-# 4. 打包成新镜像
-docker commit -m "cart project" -a "zyc" tomcat-cp tomcat-cart:v1
-- `-m`：提交说明（message）
-- `-a`：作者（author）
-- 最后两个：**源容器** 和 **新镜像名**
-
-# 5. 临时容器用完就删，把 8082 腾出来
-docker rm -f tomcat-cp
-
-# 6. 用新镜像直接跑，注意：没有 -v，也没有 cp
-docker run -d -p 8082:8080 --name tomcat-cart tomcat-cart:v1
-
-# 7. 访问 IP:8082，应该直接是购物车
-```
-
-第 6 步就是这一节想说明的：**一条 `docker run` 就把项目带走了，不用再 `cp`。**
-
-```bash
-docker images
-# 会多出 tomcat-cart  v1  xxxxx  刚刚  4xxMB（比原来的大几MB，项目进去了）
-```
-
-
-11.1 commit 的局限（重要）
-
-| 场景 | commit 合适吗 |
-| :--- | :--- |
-| 项目已经开发完成、不再改动 | ✅ 合适，打包一次到处用 |
-| 项目还在调试，今天改完明天还要改 | ❌ 不合适，改一次就得重新 commit 一次 |
-
-所以后面还有更好的办法——**数据卷挂载**（第十三节）。
-
----
-
-## 十二、镜像的导出与导入（save / load）
-
-**场景**：A 服务器有网，已经拉好了 nginx、mysql、tomcat 镜像；B 服务器没网，但也装了 Docker。怎么把镜像弄过去？
-
-**思路**：把 A 上的镜像**导出成一个本地文件**（tar 包），拷贝到 B，再**从文件导入**成镜像。
-
-### 12.1 导出（save）
-
-```bash
-docker save <镜像ID或名字> -o <文件名.tar>
-```
-
-课上实际执行：
-
-```bash
-docker save 0a2249be3d31 -o tomcat8.tar
-```
-
-- `-o` 就是 output
-- 生成的文件在当前目录下（相对路径）
-
-### 12.2 导入（load）
-
-```bash
-docker load -i <文件名.tar>
-```
-
-```bash
-docker load -i tomcat8.tar
-docker images          # tomcat:8 又回来了
-```
-
-### 12.3 commit 和 save 别搞混
-
-| 命令 | 方向 | 结果 |
-| :--- | :--- | :--- |
-| `docker commit` | **容器 → 镜像** | 把跑起来的容器固化成一个新镜像，存在 Docker 里 |
-| `docker save` | **镜像 → 本地文件** | 把镜像导出成 `.tar` 文件，可以拷 U 盘、拷到别的服务器 |
-| `docker load` | **本地文件 → 镜像** | 把 `.tar` 文件还原成镜像 |
-
-> 有了本地 tar 包做备份，以后就不用每次 `docker pull` 了，从本地 load 更快，也不怕仓库地址失效。
-
----
-
-## 十三、数据卷挂载（-v）——实际最好用的方式,也是数据安全性的保证
-
-### 13.1 commit 方式的问题
-
-- 项目还在改 → 每次改完都要 commit 一次，太蠢；
-- `docker cp` → 每发一次版拷一次，也累。
-
-### 13.2 挂载的思路
-
-**把宿主机的某个目录，和容器里的 `webapps` 目录，直接"绑"在一起。**
-
-```
-宿主机 /root/webapps  ←——同一个目录——→  容器 /usr/local/tomcat/webapps
-```
-
-以后只需要往宿主机的目录里放文件，容器里立刻就有。**改宿主机 = 改容器**。
-
-### 13.3 命令
-
-```bash
-docker run -d -p 8081:8080 --name tomcat-01 \
-  -v /home/zyc/dist:/usr/local/tomcat/webapps/ROOT \
-  tomcat:8
-```
-
-- `-v` = volume（数据卷）
-- 格式：`-v 宿主机目录:容器目录`
-- 注意方向：**前面是宿主机的，后面是容器的**
-
-### 13.4 课上验证过程
-
-1. 在宿主机上准备一个目录，把项目拷进去：
-
-```bash
-#这里是静态网页的方法,如果vue项目的话需要在Windows 执行 `npm run build` → `dist.zip` 传到 `/home/zyc/dist`
-mkdir -p /home/zyc/web
-cp -r /opt/tomcat8/webapps/dict /home/zyc/web
-ls /root/webapps        # mi
-```
-
-2. 用 `-v` 参数启动容器：
-
-```bash
-#vue2项目
-docker run -d -p 8081:8080 --name tomcat-01 \
-  -v /home/zyc/dist:/usr/local/tomcat/webapps/ROOT \
-  tomcat:8
-```
-
-3. 浏览器访问 `IP:8080/mi/index.html` → 正常显示。
-
-4. **验证"热更新"**：在宿主机上改文件
-
-```bash
-cd /home/zyc/dist
-
-# 先看看现在的标题是什么
-grep -o '<title>[^<]*</title>' index.html
-
-# 改掉它
-sed -i 's#<title>.*</title>#<title>热更新成功</title>#' index.html
-
-# 确认改上了
-grep -o '<title>[^<]*</title>' index.html
-```
-
-5. 浏览器直接刷新（**没有重启容器、没有重新拷贝**）→ 页面标题变了。
-
-**证明两边真的是同一个目录。**
-
-### 13.5 挂载方式的好处
-
-- 改代码 / 换版本，只往宿主机目录里丢文件就行，容器不用动；
-- 多个容器可以挂载**同一个宿主机目录**，一次修改全部生效；
-- 容器删了，宿主机的文件还在，数据不会丢。
-
-> （补充）这种叫"绑定挂载"（bind mount）。Docker 还有另一种"命名卷"（`-v 卷名:容器路径`），由 Docker 管理存储位置，更适合放数据库数据。日常发布项目用绑定挂载最直观。
-
-> ⚠️ **CentOS 上的坑**：SELinux 默认 enforcing，挂载后访问会 403/404。先 `getenforce` 看状态，如果是 `Enforcing`，临时 `setenforce 0`，或者给目录打标签 `chcon -Rt svirt_sandbox_file_t /root/webapps`。
-
----
-
-## 十四、命令总表
+## 十六、命令总表
 
 ### 镜像相关
 
@@ -1249,7 +1305,7 @@ grep -o '<title>[^<]*</title>' index.html
 
 ---
 
-## 十五、完整流程速查
+## 十七、完整流程速查
 
 ```bash
 # 0. 装好 Docker + 配镜像加速器
@@ -1319,7 +1375,7 @@ docker run -d -p 8081:8080 --name tomcat-01 \
 
 ---
 
-## 十六、坑与技巧（补充）
+## 十八、坑与技巧（补充）
 
 | 现象 | 原因 | 解决 |
 | :--- | :--- | :--- |
@@ -1340,7 +1396,7 @@ docker run -d -p 8081:8080 --name tomcat-01 \
 
 ---
 
-## 十七、一句话总结
+## 十九、一句话总结
 
 > **传统方式**：装 JDK → 配环境变量 → 装 Tomcat → 传项目 → 关防火墙（十几步，换机器重来）
 > **Docker 方式**：`docker pull` → `docker run -d -p 8080:8080 -v 目录 tomcat:8`（两步）
