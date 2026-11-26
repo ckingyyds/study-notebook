@@ -323,7 +323,7 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
-@app.get("/")
+@app.get("/")  #这里/表示根路径
 def root():
     return {"message": "Hello, FastAPI!"}
 
