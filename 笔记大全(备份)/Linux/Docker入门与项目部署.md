@@ -597,7 +597,7 @@ Apache Tomcat/8.5.100
 ## 十、把项目放进容器
 
 > **这一章做什么**：把宿主机上的网页放进去，让浏览器能看到内容。
-> **做完会看到**：`http://虚拟机IP:8080/mi/index.html` 出页面。
+> **做完会看到**：`http://虚拟机IP:8080/dict/` 出页面。
 
 项目在**宿主机**（Linux）上，Tomcat 在**容器**里，这两者之间原来没有通路。有两条路：`docker cp` 拷进去，或者 `docker exec` 进去看看再拷。
 
@@ -641,21 +641,23 @@ vi a.txt        # bash: vi: command not found
 
 ```bash
 # 语法：docker cp 宿主机路径 容器ID:容器内路径
-docker cp ./mi <容器ID>:/usr/local/tomcat/webapps/
+docker cp ./dict <容器ID>:/usr/local/tomcat/webapps/
 ```
 
-课上把宿主机 `/opt/tomcat8/webapps/mi`（那个"小米"网页项目）拷进了容器的 `webapps` 下。
+老师课上把宿主机 `/opt/tomcat8/webapps/mi`（那个"小米"网页项目）拷进了容器的 `webapps` 下。
+
+我自己的项目叫 `dict`，就在同一个 `webapps` 目录里（`/opt/tomcat8/webapps/dict`）。下面统一拿它演示，操作完全一样。
 
 拷完再进去验证：
 
 ```bash
 docker exec -it <容器ID> bash
 cd webapps
-ls              # 能看到 mi 了
+ls              # 能看到 dict 了
 exit
 ```
 
-然后浏览器访问 `http://虚拟机IP:8080/mi/index.html`，页面就出来了。
+然后浏览器访问 `http://虚拟机IP:8080/dict/`，页面就出来了。
 
 ---
 
@@ -783,8 +785,10 @@ docker images          # tomcat:8 又回来了
 **把宿主机的某个目录，和容器里的 `webapps` 目录，直接"绑"在一起。**
 
 ```
-宿主机 /root/webapps  ←——同一个目录——→  容器 /usr/local/tomcat/webapps
+宿主机 /home/zyc/web  ←——同一个目录——→  容器 /usr/local/tomcat/webapps
 ```
+
+> 老师演示时用的是 `/root/webapps`（他是 root）。我是 `zyc` 用户，写自己家目录下的 `/home/zyc/web` 就行，效果一样，还不用每次 `sudo`。下面的命令都按后者写。
 
 以后只需要往宿主机的目录里放文件，容器里立刻就有。**改宿主机 = 改容器**。
 
@@ -792,7 +796,7 @@ docker images          # tomcat:8 又回来了
 
 ```bash
 docker run -d -p 8080:8080 --name tomcat-01 \
-  -v /root/webapps:/usr/local/tomcat/webapps \
+  -v /home/zyc/web:/usr/local/tomcat/webapps \
   tomcat:8
 ```
 
@@ -805,13 +809,13 @@ docker run -d -p 8080:8080 --name tomcat-01 \
 **第 1 步：在宿主机准备目录，把网页放进去**
 
 ```bash
-mkdir -p /root/webapps
-cp -r /opt/tomcat8/webapps/mi /root/webapps/
-ls /root/webapps
-# mi
+mkdir -p /home/zyc/web
+cp -r /opt/tomcat8/webapps/dict /home/zyc/web/
+ls /home/zyc/web
+# dict
 ```
 
-（`mi` 是老师给的网页示例。没有这个目录的话，随便写一个 `index.html` 放进去效果一样；Vue 这类需要编译的项目看第十五章。）
+（`dict` 是我自己放在宿主机 Tomcat `webapps` 里的项目；换成任何一个静态网页目录都一样。Vue 这类需要编译的项目看第十五章。）
 
 **第 2 步：删掉旧容器，用挂载方式重新起**
 
@@ -821,7 +825,7 @@ ls /root/webapps
 docker rm -f tomcat-01
 
 docker run -d -p 8080:8080 --name tomcat-01 \
-  -v /root/webapps:/usr/local/tomcat/webapps \
+  -v /home/zyc/web:/usr/local/tomcat/webapps \
   tomcat:8
 ```
 
@@ -829,14 +833,14 @@ docker run -d -p 8080:8080 --name tomcat-01 \
 
 **第 3 步：浏览器访问**
 
-`http://虚拟机IP:8080/mi/index.html`
+`http://虚拟机IP:8080/dict/`
 
-这里挂的是整个 `webapps` 目录，所以地址里带 `mi/` 这一层；如果把目录直接挂到 `ROOT`，访问就是 `IP:8080/`。
+这里挂的是整个 `webapps` 目录，所以地址里带 `dict/` 这一层；如果把目录直接挂到 `ROOT`，访问就是 `IP:8080/`。
 
 **第 4 步：在宿主机上改文件**
 
 ```bash
-cd /root/webapps/mi
+cd /home/zyc/web/dict
 
 grep -o '<title>[^<]*</title>' index.html        # 看看现在的标题
 sed -i 's#<title>.*</title>#<title>热更新成功</title>#' index.html
@@ -863,7 +867,7 @@ grep -o '<title>[^<]*</title>' index.html        # 确认改上了
 
 > （补充）这种叫"绑定挂载"（bind mount）。Docker 还有另一种"命名卷"（`-v 卷名:容器路径`），由 Docker 管理存储位置，更适合放数据库数据。日常发布项目用绑定挂载最直观。
 
-> ⚠️ **CentOS 上的坑**：SELinux 默认 enforcing，挂载后访问会 403/404。先 `getenforce` 看状态，如果是 `Enforcing`，临时 `setenforce 0`，或者给目录打标签 `chcon -Rt svirt_sandbox_file_t /root/webapps`。
+> ⚠️ **CentOS 上的坑**：SELinux 默认 enforcing，挂载后访问会 403/404。先 `getenforce` 看状态，如果是 `Enforcing`，临时 `setenforce 0`，或者给目录打标签 `chcon -Rt svirt_sandbox_file_t /home/zyc/web`。
 
 ---
 
@@ -1070,7 +1074,7 @@ docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' tomcat-01
 
 ### 15.1 拷之前先搞清楚：Vue 项目要先 build
 
-前面拷的 `mi` 是老师做好的静态网页（已经是 html + 图片），拷进去就能用。
+前面拷的 `dict` 是现成的静态网页（已经是 html + 图片这类成品），拷进去就能用。
 
 但我自己的购物车项目（`buy-list`，vue 2.6.14 + vuex + axios + echarts，没用 vue-router）不一样——它是**源码**。
 
@@ -1314,28 +1318,28 @@ npm install --registry=https://registry.npmmirror.com
 docker pull tomcat:8
 
 # 2. 准备项目目录并放项目
-mkdir -p /root/webapps
-cp -r /opt/tomcat8/webapps/mi /root/webapps/
+mkdir -p /home/zyc/web
+cp -r /opt/tomcat8/webapps/dict /home/zyc/web/
 
 # 3. 启动容器（挂载方式）
 docker run -d -p 8080:8080 --name tomcat-01 \
-  -v /root/webapps:/usr/local/tomcat/webapps \
+  -v /home/zyc/web:/usr/local/tomcat/webapps \
   tomcat:8
 
 # 4. 检查
 docker ps
 
 # 5. 浏览器访问
-#    http://虚拟机IP:8080/mi/index.html
+#    http://虚拟机IP:8080/dict/
 
-# 6. 以后改项目：直接改 /root/webapps 里的文件，刷新页面即可
+# 6. 以后改项目：直接改 /home/zyc/web 里的文件，刷新页面即可
 ```
 
 **做集群（跑第二个容器）：**
 
 ```bash
 docker run -d -p 8081:8080 --name tomcat-02 \
-  -v /root/webapps:/usr/local/tomcat/webapps \
+  -v /home/zyc/web:/usr/local/tomcat/webapps \
   tomcat:8
 ```
 

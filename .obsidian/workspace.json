@@ -23,13 +23,13 @@
             }
           },
           {
-            "id": "6b80b02309d50b91",
+            "id": "bfbd8151c689a388",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
                 "file": "笔记大全(备份)/Linux/Docker入门与项目部署.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false,
                 "backlinks": false
               },
@@ -180,7 +180,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "6b80b02309d50b91",
+  "active": "bfbd8151c689a388",
   "lastOpenFiles": [
     "笔记大全(备份)/Linux/Docker.md",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md",
