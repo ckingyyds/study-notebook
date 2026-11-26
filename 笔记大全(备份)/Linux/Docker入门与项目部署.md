@@ -912,6 +912,19 @@ docker pull nginx
 sudo ss -lntp | grep ':80 '
 ```
 
+**`docker pull nginx` 没写版本，拉下来的其实是 `nginx:latest`。**
+
+> 跟第五章的道理一样：不写 tag 默认取 `latest`。但 nginx 用 `latest` 一般没问题——它的配置文件语法十年没大改，新旧版本基本通用。
+>
+> 这和 `tomcat` 必须锁 `:8` 是两回事：Tomcat 10 起 Servlet 从 `javax.*` 换成了 `jakarta.*`，老代码直接跑不起来，所以才必须钉死版本。nginx 没有这种断裂。
+>
+> 真要稳妥（比如公司服务器要求可复现），可以锁具体版本号：
+> ```bash
+> docker pull nginx:1.24
+> docker run -d -p 80:80 --name nginx01 nginx:1.24
+> ```
+> 注意 `run` 时也要带上同样的版本号，只写 `nginx` 又会回到 latest。
+
 如果 `80` 那条**什么都没有**，直接用它；如果被占了（老师机器上就被别的服务占了，只好改用 81），就换个宿主端口，比如 `-p 8090:80`。
 
 我这台机器 80 是空的，所以：
