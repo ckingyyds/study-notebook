@@ -545,7 +545,7 @@ Tomcat 在容器里跑，也是监听 8080。把宿主机的 8080 和容器的 8
 说明宿主机的 8080 已经被别的程序占了（最常见是之前手工装过 Tomcat）。两个选择：
 
 - **图快**：把 `-p 8080:8080` 改成 `-p 8081:8080`，后面访问一律用 8081；
-- **图彻底**：翻到第十四章，把宿主机 Tomcat 和容器各分一个端口，两个都留着用。
+- **图彻底**：翻到第十五章，把宿主机 Tomcat 和容器各分一个端口，两个都留着用。
 
 ### 8.2 运行之后检查
 
@@ -815,7 +815,7 @@ ls /home/zyc/web
 # dict
 ```
 
-（`dict` 是我自己放在宿主机 Tomcat `webapps` 里的项目；换成任何一个静态网页目录都一样。Vue 这类需要编译的项目看第十五章。）
+（`dict` 是我自己放在宿主机 Tomcat `webapps` 里的项目；换成任何一个静态网页目录都一样。Vue 这类需要编译的项目看第十六章。）
 
 **第 2 步：删掉旧容器，用挂载方式重新起**
 
@@ -829,7 +829,7 @@ docker run -d -p 8080:8080 --name tomcat-01 \
   tomcat:8
 ```
 
-> 宿主机 8080 如果已经被别的程序占着，把 `-p 8080:8080` 换成 `-p 8081:8080`，访问时端口跟着换。这个问题第十四章细讲。
+> 宿主机 8080 如果已经被别的程序占着，把 `-p 8080:8080` 换成 `-p 8081:8080`，访问时端口跟着换。这个问题第十五章细讲。
 
 **第 3 步：浏览器访问**
 
@@ -871,12 +871,570 @@ grep -o '<title>[^<]*</title>' index.html        # 确认改上了
 
 ---
 
-## 十四、进阶：容器到底是什么，以及我踩过的坑
+---
 
-> ⚠️ **这一章是进阶，可以选择跳过**：只想先把流程跑通的，直接翻到第十七章的「完整流程速查」。
+## 十四、Nginx——统一入口、反向代理和负载均衡
+
+> **这一章做什么**：到目前为止，一个项目一个端口：`8080/dict`、`8081/`……项目一多，端口就记不住了。这一章用 Nginx 把这些端口收到一个入口后面，做到"只敲 `IP/dict` 就能进"；再往上一步，用 Nginx 把请求轮流分给三台容器，做**负载均衡**。
+> 全章都在我自己的虚拟机上跑，项目用我已经有的 `dict`，端口按我机器的实际情况排（我的 8080 被宿主机 Tomcat 占着，所以容器从 8081 开始）。
+
+### 14.1 Nginx 是干什么的
+
+Nginx 和 Tomcat 一样，可以当**Web 容器**用，但它比 Tomcat 轻得多，也不认识 Java。它的三个典型用途：
+
+| 用途 | 说明 | 这一章会不会做 |
+| :--- | :--- | :--- |
+| **Web Server**（静态网页服务器） | 纯 html/css/js 的项目，用它比 Tomcat 更合适 | 会（14.2~14.4） |
+| **反向代理** | 一个入口，按路径把请求转给后面不同的服务 | 会（14.5~14.9） |
+| **负载均衡** | 后面三台跑同一个项目，请求轮流分给它们 | 会（14.10~14.11） |
+
+> （补充）还有缓存、限流、HTTPS 终结这些能力，等真正用到再回来看。日常后端要配 Nginx，八成就是在配这三件事里的某一件。
+
+**先记几个默认端口**，以后见到就知道是谁：
+
+| 服务 | 默认端口 |
+| :--- | :--- |
+| Nginx | **80** |
+| Tomcat | 8080 |
+| MySQL | 3306 |
+| Redis | 6379 |
+| Oracle | 1521 |
+
+> 平时上网不用敲端口，是因为浏览器默认走 80（https 走 443）。真实生产里对外几乎都只开 Nginx 的 80/443，后面的 Tomcat 都在内网，用户永远看不到 8080。
+
+### 14.2 先用最朴素的方式跑起来
+
+```bash
+# 1. 拉镜像（我本地没有，老师机器上早就有）
+docker pull nginx
+
+# 2. 先确认 80 端口有没有被占
+sudo ss -lntp | grep ':80 '
+```
+
+如果 `80` 那条**什么都没有**，直接用它；如果被占了（老师机器上就被别的服务占了，只好改用 81），就换个宿主端口，比如 `-p 8090:80`。
+
+我这台机器 80 是空的，所以：
+
+```bash
+docker run -d -p 80:80 --name nginx01 nginx
+```
+
+```text
+# 预期输出：容器 ID
+1c2f3a9e5b7d0e4a6c8b2f1d3e5a7c9b0d2f4e6a8c0b1d3f5e7a9c2b4d6f8e0a
+```
+
+```bash
+docker ps
+```
+
+```text
+CONTAINER ID   IMAGE   COMMAND                  PORTS                               NAMES
+1c2f3a9e5b7d   nginx   "/docker-entrypoint.…"   0.0.0.0:80->80/tcp, :::80->80/tcp   nginx01
+```
+
+浏览器打开 `http://虚拟机IP`（不用写端口），看到：
+
+> **Welcome to nginx!**
+> If you see this page, the nginx web server is successfully installed and working…
+
+就看到这个页面，说明 **Nginx 已经装好、已经在跑**。
+
+#### `-p 80:80` 的两个 80 是谁
+
+- 前一个 `80`：**宿主机的 80**，外面访问 `IP`（不写端口默认 80）打到这里；
+- 后一个 `80`：**容器里的 80**，Nginx 在容器内部监听的就是它。
+
+这两个 80 可以不一样，比如 `-p 8090:80`，外面访问 `IP:8090`，容器里还是 80。**这一点在 14.8 配 `nginx.conf` 时会要命**，先记住。
+
+> ⚠️ 老师在这一步踩过坑：他的 80 被机器上另一个服务占着，`docker run` 起不来，重启一次也没用，最后干脆改成 `-p 81:80`，访问 `IP:81`。
+
+### 14.3 页面藏在容器里的哪个位置
+
+要换成自己的项目，得先知道这页 HTML 在哪。
+
+```bash
+docker exec -it nginx01 bash
+```
+
+注意：**进 Nginx 容器后落脚点不是 `/`**（和 Tomcat 不一样，Tomcat 一进去就在 `/usr/local/tomcat`），所以直接 `whereis nginx` 找：
+
+```bash
+whereis nginx
+```
+
+```text
+nginx: /usr/sbin/nginx /etc/nginx /usr/share/nginx /usr/share/man/man8/nginx.8.gz
+```
+
+两个关键目录：
+
+| 目录 | 放什么 |
+| :--- | :--- |
+| `/etc/nginx` | **配置文件**，反向代理、负载均衡全在这儿配 |
+| `/usr/share/nginx` | 网站文件，网页就在 `html/` 里 |
+
+```bash
+cd /usr/share/nginx/html
+ls
+cat index.html
+```
+
+```text
+50x.html  index.html
+```
+
+`index.html` 的内容就是刚才那个 "Welcome to nginx!" 页面。**把它换成我的页面，就等于发布成功了。**
+
+### 14.4 把项目放进 Nginx：先 `cp`，再挂载
+
+我的项目是宿主机上的 `/home/zyc/web/dict`。
+
+**方式一：`docker cp`（和第十章一样）**
+
+```bash
+exit                              # 先退出容器
+cp -r /home/zyc/web/dict .        # 确保宿主机当前目录下有 dict
+docker cp ./dict nginx01:/usr/share/nginx/html/
+```
+
+访问 `http://虚拟机IP/dict/` 就能看到项目首页。
+
+想让它**只敲 IP 就出来**，就把 `dict` 里的 `index.html` 挪到 `html` 根目录（会覆盖 Nginx 的欢迎页）：
+
+```bash
+docker exec -it nginx01 bash -c "cp -r /usr/share/nginx/html/dict/* /usr/share/nginx/html/"
+```
+
+**方式二：挂载（推荐）**
+
+```bash
+docker rm -f nginx01
+
+docker run -d -p 80:80 --name nginx01 \
+  -v /home/zyc/web/dict:/usr/share/nginx/html \
+  nginx
+```
+
+`/usr/share/nginx/html` 整个换成宿主机目录，**以后改页面不用再 cp、不用重启**，刷新就是新的。这就是第十三章讲的挂载，换成 Nginx 一样好用。
+
+#### 所以 Tomcat 和 Nginx 该怎么选
+
+| 场景 | 用谁 |
+| :--- | :--- |
+| 后端是 Java（Spring、JSP、Servlet） | **Tomcat**（Nginx 跑不了 Java） |
+| 后端是 Python/Node/Go，或者纯静态页面 | 后端自己跑，前面用 **Nginx** 当入口 |
+| 纯静态页面（html/css/js），就一个 | 两个都行，**Nginx 更轻** |
+
+### 14.5 反向代理：一个入口，多个项目
+
+先看问题。假设我机器上有三个项目：
+
+```text
+http://虚拟机IP:8081/dict/     词典
+http://虚拟机IP:8082/jd/       京东
+http://虚拟机IP:8083/tb/       淘宝
+```
+
+用户得记三个端口，而且端口一改（比如跟别的服务撞了）他就打不开了。
+
+**反向代理**就是：对外只暴露 Nginx 一个端口，Nginx 看路径决定给谁：
+
+```text
+http://虚拟机IP/dict/   →  Nginx  →  转给 8081 那台
+http://虚拟机IP/jd/     →  Nginx  →  转给 8082 那台
+http://虚拟机IP/tb/     →  Nginx  →  转给 8083 那台
+```
+
+用户眼里只有一个服务器、一个端口，后面的结构他完全不知道。
+
+> **"反向"是相对谁而言**：正向代理（比如翻墙工具）替**客户端**去访问外面；反向代理替**服务端**接待请求。方向相反，所以叫反向。
+
+### 14.6 前置条件：让容器之间能互相找到
+
+这里有个坑必须提前解决：**容器之间默认是互相隔离的**，Nginx 要转发给 Tomcat，首先得能"找到"那台 Tomcat。
+
+Docker 的解法是**自定义网络**：把几个容器放进同一个网络，它们就能用**容器名**互相访问。
+
+```bash
+# 1. 看现有的网络（默认会有 bridge / host / none 三个）
+docker network ls
+
+# 2. 建一个自己的
+docker network create tomcat_net
+
+# 3. 看它里面有什么（现在是空的）
+docker network inspect tomcat_net
+```
+
+```text
+# 3 的输出里有这么一段，现在 Containers 是空的：
+"Containers": {},
+```
+
+以后启动容器时加 `--network tomcat_net`，容器就进这个网络了。**同一个网络里，可以直接用容器名当主机名**，比如后面 `proxy_pass http://tomcat01:8080`。
+
+### 14.7 搭一个"三台服务器 + 一个入口"的局
+
+我的端口规划（和我机器的实际情况对齐）：
+
+| 谁 | 宿主机端口 | 容器内端口 | 说明 |
+| :--- | :--- | :--- | :--- |
+| 宿主机上的 Tomcat | 8080 | — | 之前手装的那个，不动它 |
+| 容器 tomcat01 | 8081 | 8080 | |
+| 容器 tomcat02 | 8082 | 8080 | |
+| 容器 tomcat03 | 8083 | 8080 | |
+| **Nginx** | **80** | 80 | 统一入口 |
+
+**第一步：清掉旧容器**（项目是挂载的，删容器不会丢文件）
+
+```bash
+docker rm -f tomcat-01
+```
+
+**第二步：起三台 Tomcat，都加入同一个网络**
+
+```bash
+docker run -d -p 8081:8080 --name tomcat01 \
+  --network tomcat_net --restart=always \
+  -v /home/zyc/web:/usr/local/tomcat/webapps \
+  tomcat:8
+
+docker run -d -p 8082:8080 --name tomcat02 \
+  --network tomcat_net --restart=always \
+  -v /home/zyc/web:/usr/local/tomcat/webapps \
+  tomcat:8
+
+docker run -d -p 8083:8080 --name tomcat03 \
+  --network tomcat_net --restart=always \
+  -v /home/zyc/web:/usr/local/tomcat/webapps \
+  tomcat:8
+```
+
+三台挂的是**同一个宿主机目录** `/home/zyc/web`（里面就一个 `dict`），所以三台项目一模一样 —— 这正是"集群"的形态。
+
+**第三步：确认三台都在网络里**
+
+```bash
+docker network inspect tomcat_net
+```
+
+```text
+"Containers": {
+    "…": { "Name": "tomcat01", … },
+    "…": { "Name": "tomcat02", … },
+    "…": { "Name": "tomcat03", … }
+}
+```
+
+**第四步：起 Nginx，也加入这个网络**
+
+先把配置文件从容器里拷出来（容器里没 `vi`，必须在宿主机改好再挂进去）：
+
+```bash
+# 用一次性容器把默认配置拷出来
+docker cp nginx01:/etc/nginx/nginx.conf ./nginx.conf   2>/dev/null || \
+docker run --rm nginx cat /etc/nginx/nginx.conf > nginx.conf
+
+mkdir -p /home/zyc/nginx
+mv nginx.conf /home/zyc/nginx/
+```
+
+然后带着挂载启动：
+
+```bash
+docker rm -f nginx01
+
+docker run -d -p 80:80 --name nginx01 \
+  --network tomcat_net --restart=always \
+  -v /home/zyc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+  nginx
+```
+
+> 这里**只挂 `nginx.conf` 一个文件**。想连网页一起挂，再加一条 `-v /home/zyc/web/dict:/usr/share/nginx/html`。
+
+**第五步：四台都在跑**
+
+```bash
+docker ps
+```
+
+```text
+CONTAINER ID   IMAGE     PORTS                     NAMES
+…              nginx     0.0.0.0:80->80/tcp        nginx01
+…              tomcat:8  0.0.0.0:8081->8080/tcp    tomcat01
+…              tomcat:8  0.0.0.0:8082->8080/tcp    tomcat02
+…              tomcat:8  0.0.0.0:8083->8080/tcp    tomcat03
+```
+
+先单独验证三个都能打开：`IP:8081/dict/`、`IP:8082/dict/`、`IP:8083/dict/`，**都是同一个页面就是对的**。
+
+### 14.8 配置 `nginx.conf`：把路径转发出去
+
+打开 `/home/zyc/nginx/nginx.conf`，找到 `http { ... }` 块，在里面加一个 `server`：
+
+```nginx
+http {
+    # …… 中间原来那一堆 include、log_format 都不用动 ……
+
+    server {
+        listen       80;
+        server_name  _;
+
+        location /dict {
+            proxy_pass http://tomcat01:8080;
+        }
+
+        location /jd {
+            proxy_pass http://tomcat02:8080;
+        }
+
+        location /tb {
+            proxy_pass http://tomcat03:8080;
+        }
+    }
+}
+```
+
+逐行解释：
+
+| 写法 | 意思 |
+| :--- | :--- |
+| `listen 80` | Nginx **自己在容器里**监听 80 |
+| `location /dict` | 用户访问的路径以 `/dict` 开头 |
+| `proxy_pass http://tomcat01:8080` | 转给 `tomcat01` 这个容器的 8080 |
+
+**为什么能写 `tomcat01` 这个名字？** 因为 Nginx 容器和 tomcat01 在同一个 `tomcat_net` 网络里，Docker 内置了 DNS，容器名就能直接解析成 IP。没加 `--network` 的话这里会报 `host not found in upstream`。
+
+> ⚠️ **老师踩的坑（重点，14.12 细讲）**：`listen` 写的是**容器里的端口**。老师的外部端口改成了 81，就把 `listen` 也写成了 81 —— 这是错的，正因为这个，他的反向代理一直 404。
+
+### 14.9 重启生效，然后验证
+
+配置改完必须让 Nginx 重新加载：
+
+```bash
+docker restart nginx01
+```
+
+```bash
+docker ps                                  # 四个都是 Up
+docker exec nginx01 nginx -t               # 测配置语法
+```
+
+```text
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+```
+
+然后浏览器：
+
+```text
+http://虚拟机IP/dict/     →  8081 那台的项目
+http://虚拟机IP/jd/       →  8082 那台
+http://虚拟机IP/tb/       →  8083 那台
+```
+
+**一个入口、三个项目**，反向代理就跑通了。
+
+> （补充）如果报 `502 Bad Gateway`，九成是 `proxy_pass` 里的主机名/端口写错了，或者容器不在同一个网络；如果报 `404`，是路径没对上（`proxy_pass` 后面带不带斜杠会影响路径拼接方式，见下一节的说明）。
+
+#### `proxy_pass` 后面带不带斜杠的区别
+
+```nginx
+location /dict {
+    proxy_pass http://tomcat01:8080;      # 转发时保留 /dict
+}
+location /jd {
+    proxy_pass http://tomcat02:8080/;     # 转发时把 /jd 去掉
+}
+```
+- 不带斜杠：`/jd/a.html` → 后端收到 `/jd/a.html`
+- 带斜杠：`/jd/a.html` → 后端收到 `/a.html`
+
+我的 `dict` 是个目录项目，访问 `/dict/` 要能对上 `webapps/dict/`，所以**不带斜杠**。
+
+### 14.10 负载均衡：三台跑同一个项目
+
+反向代理解决的是"**不同**项目走同一个入口"，负载均衡解决的是"**同一个**项目扛不住，分给多台"。
+
+> 注意区分：三台跑小米、京东、淘宝，那是反向代理；三台都跑小米，才叫**集群**，才谈得上负载均衡。
+
+现在我的三台 Tomcat 已经挂着同一个 `dict` 了，就差让 Nginx 轮流分。
+
+在 `http {}` 里，**在 `server` 之前**声明一个 `upstream`：
+
+```nginx
+http {
+    upstream tomcat_cluster {
+        server tomcat01:8080 weight=1;
+        server tomcat02:8080 weight=1;
+        server tomcat03:8080 weight=1;
+    }
+
+    server {
+        listen       80;
+        server_name  _;
+
+        location / {
+            proxy_pass http://tomcat_cluster;
+        }
+    }
+}
+```
+
+| 写法 | 意思 |
+| :--- | :--- |
+| `upstream 名字 { ... }` | 声明一个集群，名字随便起，下面 `proxy_pass` 引用它 |
+| `server IP:端口 weight=N` | 集群里的一台，`weight` 是权重 |
+| `proxy_pass http://集群名` | 把请求交给这个集群，而不是某一台 |
+
+**权重都是 1 的时候，就是轮询**：第一个请求给 01，第二个给 02，第三个给 03，第四个又回 01。
+
+#### 怎么"看"出请求到底给了哪台
+
+三台内容一模一样，光看页面分不出来。所以要**做个小标记**。
+
+我懒得改三份文件，直接给三台的 `dict/index.html` 加一行字（挂载的好处，改宿主机就三台同时变），但那样三台还是一样……所以换个办法：**分别改容器里的**：
+
+```bash
+docker exec tomcat01 sh -c 'echo "<p>我是 tomcat01 (8081)</p>" >> /usr/local/tomcat/webapps/ROOT/index.html'
+```
+
+> 更简单的做法：三台**各自挂不同目录**，里面放内容略有差异的同一份项目。我这里图快，直接进容器改（注意这是临时改，容器删了就没了）。
+
+（补充）其实最省事的验证方式是不改页面，而是看 Nginx 的访问日志：
+
+```bash
+docker logs -f nginx01
+```
+每刷新一次，日志里就多一行，配合 `upstream` 的 `access_log` 能看到转给了哪台。
+
+### 14.11 权重与 ip_hash：两种分发策略
+
+#### 权重（weight）：按能力分活
+
+```nginx
+upstream tomcat_cluster {
+    server tomcat01:8080 weight=2;    # 干两份
+    server tomcat02:8080 weight=1;
+    server tomcat03:8080 weight=1;
+}
+```
+
+四次请求里，大约两次给 01、一次给 02、一次给 03。
+
+**什么时候用**：三台机器配置不一样。性能强的权重大，不然轮询会让强的那台闲着、弱的那台扛不住。
+
+#### ip_hash：同一个用户锁死一台
+
+权重策略有个**致命问题**：带登录的项目会乱。
+
+用户第一次访问到了 tomcat01，在那里登录成功，Session 存在 tomcat01 里；下一次请求被轮到 tomcat02，tomcat02 上没有他的登录信息，直接把人踢回登录页 —— 用户会觉得"我明明刚登过"。
+
+解法是**让同一个用户永远落在同一台**：
+
+```nginx
+upstream tomcat_cluster {
+    ip_hash;
+    server tomcat01:8080;
+    server tomcat02:8080;
+    server tomcat03:8080;
+}
+```
+
+`ip_hash` 按客户端 IP 算哈希，IP 不变，算出来的结果就不变，永远挑同一台。个人用户 IP 基本固定，问题就解决了。
+
+> 注意 `ip_hash` 和 `weight` 一般不同时用。还有第三种 `least_conn`（连接数少的多分点），单机演示看不出效果，知道有这回事就行。
+
+| 策略 | 适合 | 不适合 |
+| :--- | :--- | :--- |
+| 轮询（`weight` 全 1） | 三台性能相当、无状态接口 | 有登录 Session 的项目 |
+| `weight` | 三台性能差异大 | 有登录 Session 的项目 |
+| `ip_hash` | **有登录的普通项目** | 用户都在同一个 NAT 后面（会全落到一台） |
+
+> （补充）生产上更常见的做法是**把 Session 外置**（存 Redis），这样三台就无状态了，什么策略都能用。这是后面学 Redis 时的正经解法，`ip_hash` 只是最省事的一种。
+
+### 14.12 ⚠️ 老师卡住的地方：`listen` 到底写 80 还是 81
+
+这一节单独拎出来，因为老师在这上面耗了大半节课，反向代理一直 404，最后是靠做负载均衡时才偶然发现的。
+
+**经过**（按实际时间顺序）：
+
+1. 老师机器 80 被占，Nginx 起在 `-p 81:80`，访问 `IP:81` 正常看到欢迎页；
+2. 配反向代理时，`server { listen 81; ... }` —— 这里写错了；
+3. 结果 `IP:81/dict` 能开（因为 nginx 没挂？其实是首页兜底），`IP:81/jd`、`IP:81/tb` 全 404；
+4. 中间试过关防火墙（`systemctl stop firewalld`）、`reboot` 重启机器，都没用；
+5. 一节课上完还没解决，**老师先跳过去演示负载均衡**；
+6. 演示负载均衡时同样的 404 又出现，老师这才把 `listen 81` 改成 `listen 80`，一改就通了；
+7. 回头确认：**反向代理的失败也是同一个原因**。
+
+**为什么是 80**：
+
+```text
+用户浏览器
+   │  访问 IP:81
+   ▼
+宿主机 81 端口            ← -p 81:80 里的第一个 81（Linux 防火墙这一层）
+   │  端口映射进来
+   ▼
+容器内的 80 端口          ← nginx.conf 的 listen 必须写这个
+   │
+   ▼
+Nginx 进程
+```
+
+`listen` 是**Nginx 在容器内部**监听谁，Nginx 镜像里它天然就是 80。宿主机的 81 是 Docker 做的转发，Nginx 自己不知道也不关心。
+
+**一句话记法**：
+
+> `-p 宿主:容器` —— `listen` 永远写**冒号后面那个**（容器端口）。
+
+同理，之前 `-p 8081:8080` 的 Tomcat，访问 8081 打到的其实是容器里的 8080；Nginx 转发时也必须是 `proxy_pass http://tomcat01:8080`，**不能写 8081**。这两个坑是同一个坑。
+
+#### 老师另外两处没跑完的地方
+
+- **反向代理没当场验证成功**：他改成 `listen 80` 之后先验证的是负载均衡，反向代理只是口头说"应该也是这个问题，一会儿再测"，并没有再完整演示一遍。所以反向代理的正确流程（14.5~14.9）是我自己按原理补的，配上负载均衡通了的现象互为印证。
+- **80 端口的占用者**：老师提到是他机器上另一个服务占着（后面会讲到的运维面板），他自己也没深究。我这边 80 是空的，所以直接用了 80。
+
+#### 本章命令回顾
+
+```bash
+# 镜像 / 容器
+docker pull nginx
+docker run -d -p 80:80 --name nginx01 nginx
+docker exec -it nginx01 bash
+whereis nginx
+
+# 网络（反向代理 / 负载均衡的前提）
+docker network ls
+docker network create tomcat_net
+docker network inspect tomcat_net
+
+# 带网络启动
+docker run -d -p 8081:8080 --name tomcat01 \
+  --network tomcat_net --restart=always \
+  -v /home/zyc/web:/usr/local/tomcat/webapps tomcat:8
+
+# 挂配置文件
+docker run -d -p 80:80 --name nginx01 \
+  --network tomcat_net --restart=always \
+  -v /home/zyc/nginx/nginx.conf:/etc/nginx/nginx.conf nginx
+
+# 生效 & 检查
+docker restart nginx01
+docker exec nginx01 nginx -t
+docker logs -f nginx01
+```
+
+---
+
+## 十五、进阶：容器到底是什么，以及我踩过的坑
+
+> ⚠️ **这一章是进阶，可以选择跳过**：只想先把流程跑通的，直接翻到第十八章的「完整流程速查」。
 > 这里回答三个问题：为什么 `ps` 能看到容器里的进程、为什么一个端口只能有一个服务、以及**我机器上已经装过 Tomcat，怎么让两个都活着**。
 
-### 14.1 跑起来之后：这个 Tomcat 到底是哪个 Tomcat
+### 15.1 跑起来之后：这个 Tomcat 到底是哪个 Tomcat
 
 容器起来之后我顺手 `ps -ef | grep [t]omcat`，扫出来这么一条：
 
@@ -910,7 +1468,7 @@ ls /usr/local/tomcat
 
 **进程是真的，路径是假的。** 这就是容器的本质。
 
-### 14.2 为什么宿主机的 `ps` 能看到容器里的进程
+### 15.2 为什么宿主机的 `ps` 能看到容器里的进程
 
 因为**容器不是虚拟机**。
 
@@ -937,7 +1495,7 @@ docker top tomcat-01
 
 这条命令只列容器内部视角的进程，就干净了。
 
-### 14.3 一个端口只能有一个主人
+### 15.3 一个端口只能有一个主人
 
 `ss -lntp | grep 8080` 最开始输出是这样的：
 
@@ -966,7 +1524,7 @@ java.net.BindException: Address already in use
 
 > 课上老师撞的是同一个现象的另一面：他 docker 里有 3 个 tomcat 容器占着 8080，本机 Tomcat 装好、`startup.sh` 也跑了，但浏览器访问到的却是容器的 404（脚注 `Apache Tomcat/8.5.100`）。后来 `docker stop` 掉那 3 个容器，本机 Tomcat 才接管 8080，页面才出来。
 
-### 14.4 想两个都要：8081 给容器，8080 给宿主机
+### 15.4 想两个都要：8081 给容器，8080 给宿主机
 
 **关键规则：端口映射在 `docker run` 那一刻就定死了，之后改不了。** 没有 `docker set-port` 这种命令，`docker update` 也改不了 `-p`。
 
@@ -1021,7 +1579,7 @@ source /etc/profile
 tail -f /opt/tomcat8/logs/catalina.out     # 看到 Server startup in xxx ms 才算真起来
 ```
 
-### 14.5 `--restart` 是少数能"后改"的配置
+### 15.5 `--restart` 是少数能"后改"的配置
 
 我想给容器加开机自启，又跑了一次 `docker run ... --restart=always`，结果报：
 
@@ -1048,7 +1606,7 @@ docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' tomcat-01
 
 这条**立即生效，容器不用停不用删**。`docker update` 能改的是资源限制（CPU/内存）和重启策略，改不了端口映射和挂载。
 
-### 14.6 那到底该留哪个
+### 15.6 那到底该留哪个
 
 | | 宿主机手工装 | Docker |
 | :--- | :--- | :--- |
@@ -1067,12 +1625,12 @@ docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' tomcat-01
 
 ---
 
-## 十五、进阶：前端项目（Vue）怎么放进容器
+## 十六、进阶：前端项目（Vue）怎么放进容器
 
 > ⚠️ **这一章是专项，只跟前端项目有关**：只讲 Vue / React 这类**需要编译**的项目怎么放进容器。
 > 如果你的项目就是普通网页（html + css + js），第十章的做法已经够用了，可以跳过。
 
-### 15.1 拷之前先搞清楚：Vue 项目要先 build
+### 16.1 拷之前先搞清楚：Vue 项目要先 build
 
 前面拷的 `dict` 是现成的静态网页（已经是 html + 图片这类成品），拷进去就能用。
 
@@ -1095,7 +1653,7 @@ docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' tomcat-01
 
 所以那句话的准确说法是：**不是 Vue 项目跑不了，是源码跑不了；编译产物跑得很好，跟老师的 `mi` 网页没有任何区别。**
 
-### 15.2 一个必踩的坑：publicPath
+### 16.2 一个必踩的坑：publicPath
 
 我的 `vue.config.js` 里什么都没配：
 
@@ -1135,7 +1693,7 @@ module.exports = defineConfig({
 
 **省事的办法是直接放 `ROOT`**，代码一个字都不用改。
 
-### 15.3 实战：build → 传 → cp → 访问
+### 16.3 实战：build → 传 → cp → 访问
 
 **第一步：在哪儿 build**
 
@@ -1214,7 +1772,7 @@ http://虚拟机IP:8080/
 
 购物车页面就出来了。
 
-### 15.4 踩坑：pnpm 装的 node_modules 是假的
+### 16.4 踩坑：pnpm 装的 node_modules 是假的
 
 第一次 build 直接失败：
 
@@ -1245,7 +1803,7 @@ npm install --registry=https://registry.npmmirror.com
 
 **教训**：一个项目别混用包管理器。我那个目录里 `package-lock.json`（npm 的）和 `pnpm-lock.yaml`（pnpm 的）两个都在——两种锁文件打架，出这种事只是迟早的。选定一个，把另一个删掉。
 
-### 15.5 整条链路串起来
+### 16.5 整条链路串起来
 
 ```
 写代码（.vue / .js / .css）
@@ -1263,7 +1821,7 @@ npm install --registry=https://registry.npmmirror.com
 
 ---
 
-## 十六、命令总表
+## 十七、命令总表
 
 ### 镜像相关
 
@@ -1309,7 +1867,7 @@ npm install --registry=https://registry.npmmirror.com
 
 ---
 
-## 十七、完整流程速查
+## 十八、完整流程速查
 
 ```bash
 # 0. 装好 Docker + 配镜像加速器
@@ -1379,7 +1937,7 @@ docker run -d -p 8081:8080 --name tomcat-01 \
 
 ---
 
-## 十八、坑与技巧（补充）
+## 十九、坑与技巧（补充）
 
 | 现象 | 原因 | 解决 |
 | :--- | :--- | :--- |
@@ -1400,7 +1958,7 @@ docker run -d -p 8081:8080 --name tomcat-01 \
 
 ---
 
-## 十九、一句话总结
+## 二十、一句话总结
 
 > **传统方式**：装 JDK → 配环境变量 → 装 Tomcat → 传项目 → 关防火墙（十几步，换机器重来）
 > **Docker 方式**：`docker pull` → `docker run -d -p 8080:8080 -v 目录 tomcat:8`（两步）
