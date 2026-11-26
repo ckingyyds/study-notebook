@@ -14,7 +14,7 @@
               "type": "markdown",
               "state": {
                 "file": "最近笔记/FastAPI从入门到实战完整教程.md",
-                "mode": "preview",
+                "mode": "source",
                 "source": false,
                 "backlinks": false
               },
@@ -165,7 +165,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "1d0b0ab427e75e65",
+  "active": "a4ad3c7c17bb55fd",
   "lastOpenFiles": [
     "最近笔记/django框架.md",
     "最近笔记/assets/FastAPI-01.png",
