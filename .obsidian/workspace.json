@@ -182,7 +182,8 @@
               "title": "添加笔记属性"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -200,7 +201,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "a4ad3c7c17bb55fd",
+  "active": "1d0b0ab427e75e65",
   "lastOpenFiles": [
     "笔记大全(备份)/Linux/Docker入门与项目部署.md",
     "笔记大全(备份)/Linux/Tomcat部署网页-虚拟机.md",
