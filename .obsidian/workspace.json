@@ -4,22 +4,22 @@
     "type": "split",
     "children": [
       {
-        "id": "f540b16af5fbf18e",
+        "id": "824e0c4598e698ab",
         "type": "tabs",
         "children": [
           {
-            "id": "2a49c64a2b2ff89b",
+            "id": "a4ad3c7c17bb55fd",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "笔记大全(备份)/Linux/Docker入门与项目部署.md",
+                "file": "最近笔记/FastAPI从入门到实战完整教程.md",
                 "mode": "preview",
                 "source": false,
                 "backlinks": false
               },
               "icon": "lucide-file",
-              "title": "Docker入门与项目部署"
+              "title": "FastAPI从入门到实战完整教程"
             }
           }
         ]
@@ -84,8 +84,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200,
-    "collapsed": true
+    "width": 200
   },
   "right": {
     "id": "ec6b0fba11e9ed7d",
@@ -101,7 +100,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "笔记大全(备份)/Linux/Docker入门与项目部署.md",
+                "file": "最近笔记/FastAPI从入门到实战完整教程.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
@@ -126,7 +125,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "笔记大全(备份)/Linux/Docker入门与项目部署.md",
+                "file": "最近笔记/FastAPI从入门到实战完整教程.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -145,7 +144,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "笔记大全(备份)/Linux/Docker入门与项目部署.md",
+                "file": "最近笔记/FastAPI从入门到实战完整教程.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -200,10 +199,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "2a49c64a2b2ff89b",
+  "active": "a4ad3c7c17bb55fd",
   "lastOpenFiles": [
-    "笔记大全(备份)/Linux/Tomcat部署网页-虚拟机.md",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md",
+    "笔记大全(备份)/Linux/Tomcat部署网页-虚拟机.md",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md~RF6087da.TMP",
     "笔记大全(备份)/Linux/白马Linux课程笔记.md",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md~RF311389.TMP",
