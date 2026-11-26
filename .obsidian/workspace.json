@@ -111,6 +111,16 @@
             }
           },
           {
+            "id": "7f91f59c992c07ef",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
+            }
+          },
+          {
             "id": "26eb99b368bcd6fc",
             "type": "leaf",
             "state": {
@@ -135,23 +145,12 @@
               "icon": "bot",
               "title": "Claudian"
             }
-          },
-          {
-            "id": "7f91f59c992c07ef",
-            "type": "leaf",
-            "state": {
-              "type": "git-view",
-              "state": {},
-              "icon": "git-pull-request",
-              "title": "Source Control"
-            }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "horizontal",
-    "width": 296.5
+    "width": 200
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -165,7 +164,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "7f91f59c992c07ef",
+  "active": "40fb8ea26f911339",
   "lastOpenFiles": [
     "笔记大全(备份)/Linux/Docker.md",
     "最近笔记/FastAPI从入门到实战完整教程.md",
