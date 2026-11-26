@@ -4,7 +4,7 @@
 
 ---
 
-> **这份笔记的写法**：先是概念（一~三），然后是我**自己动手做的完整记录**（四~六，附真实输出和踩过的坑），最后是还没实践到的知识点备查（七以后）。
+> **这份笔记的写法**：先是概念（一~三），然后是我**自己动手做的完整记录**（四~六，附真实输出和踩过的坑），中间是通用操作（七~十三）；**第十四章单独讲 Nginx**（统一入口、反向代理、负载均衡）；十五章以后是进阶和速查表。
 
 ---
 
@@ -1851,8 +1851,18 @@ npm install --registry=https://registry.npmmirror.com
 | `docker commit -m "..." -a "..." 容器 新镜像` | 把容器打包成镜像                                     |
 | `docker top <ID>`                        | 看容器内部的进程（容器视角，不受宿主机 pid namespace 干扰）        |
 | `docker inspect <ID>`                    | 查看容器全部详情（挂载、端口、重启策略、IP）                      |
-| `docker update --restart=always <ID>`    | 改重启策略，设置需要开机自启的容器,**不用重建容器**,设置restart为no则关闭 |
-|                                          |                                              |
+| `docker update --restart=always <ID>`    | 改重启策略，设置需要开机自启的容器，**不用重建容器**，设置 restart 为 no 则关闭 |
+
+### 网络相关（反向代理 / 负载均衡的前提）
+
+| 命令 | 作用 |
+| :--- | :--- |
+| `docker network ls` | 查看所有网络（默认有 bridge / host / none） |
+| `docker network create 名字` | 创建自定义网络 |
+| `docker network inspect 名字` | 查看网络详情，**`Containers` 里就是加入了这个网络的容器** |
+| `docker network rm 名字` | 删除网络 |
+
+> 同一个自定义网络里的容器，**可以直接用容器名互相访问**（Docker 内置 DNS）。`proxy_pass http://tomcat01:8080` 能生效就是因为这个；没加 `--network` 就会报 `host not found in upstream`。
 
 ### `docker run` 常用参数
 
@@ -1864,6 +1874,7 @@ npm install --registry=https://registry.npmmirror.com
 | `-v 宿主目录:容器目录` | 数据卷挂载 |
 | `--rm` | 容器停止后自动删除 |
 | `--restart=always` | 开机 / 异常退出自动重启（建好后也能用 `docker update` 改） |
+| `--network 网络名` | 加入自定义网络，容器之间可以用容器名互访（第十四章） |
 
 ---
 
@@ -1935,6 +1946,56 @@ docker run -d -p 8081:8080 --name tomcat-01 \
 | 拷贝 | `docker cp` | 每次都要重新 cp + restart | 没了 |
 | **挂载** | `-v 宿主机目录:容器目录` | `npm run build` 完刷新就行 | **在** |
 
+**Nginx 统一入口 + 负载均衡（第十四章）**
+
+```bash
+# 1. 建一个网络，让容器之间能用容器名互访
+docker network create tomcat_net
+
+# 2. 三台 Tomcat 都挂同一个项目、进同一个网络
+docker run -d -p 8081:8080 --name tomcat01 --network tomcat_net --restart=always \
+  -v /home/zyc/web:/usr/local/tomcat/webapps tomcat:8
+docker run -d -p 8082:8080 --name tomcat02 --network tomcat_net --restart=always \
+  -v /home/zyc/web:/usr/local/tomcat/webapps tomcat:8
+docker run -d -p 8083:8080 --name tomcat03 --network tomcat_net --restart=always \
+  -v /home/zyc/web:/usr/local/tomcat/webapps tomcat:8
+
+# 3. 把 Nginx 的默认配置拷到宿主机（容器里没 vi，必须在宿主机改）
+mkdir -p /home/zyc/nginx
+docker run --rm nginx cat /etc/nginx/nginx.conf > /home/zyc/nginx/nginx.conf
+
+# 4. 起 Nginx，挂配置文件、进同一个网络
+docker run -d -p 80:80 --name nginx01 --network tomcat_net --restart=always \
+  -v /home/zyc/nginx/nginx.conf:/etc/nginx/nginx.conf nginx
+
+# 5. 改完 nginx.conf 后生效
+docker restart nginx01
+docker exec nginx01 nginx -t
+```
+
+`nginx.conf` 里的两块关键配置：
+
+```nginx
+http {
+    # 反向代理：不同项目走同一个入口的不同路径
+    server {
+        listen 80;                                    # 容器内端口，不是宿主机端口！
+        location /dict { proxy_pass http://tomcat01:8080; }
+        location /jd   { proxy_pass http://tomcat02:8080; }
+        location /tb   { proxy_pass http://tomcat03:8080; }
+    }
+
+    # 负载均衡：同一个项目分给三台
+    upstream tomcat_cluster {
+        server tomcat01:8080 weight=1;
+        server tomcat02:8080 weight=1;
+        server tomcat03:8080 weight=1;
+    }
+}
+```
+
+> 权重全 1 = 轮询；有登录的项目改成 `ip_hash;`（写在 `upstream` 第一行），同一 IP 永远落到同一台。
+
 ---
 
 ## 十九、坑与技巧（补充）
@@ -1955,6 +2016,10 @@ docker run -d -p 8081:8080 --name tomcat-01 \
 | **想改端口映射**（8080 换 8081） | `-p` 在 `docker run` 那一刻就定死了，`docker update` 也改不了 | 只能 `docker rm` 后重建；项目用 `-v` 挂载的不会丢，用 `docker cp` 的要先备份 |
 | 想开机自动拉起容器（补充） | 默认不会 | `docker run` 加 `--restart=always`；已经建好的容器用 `docker update --restart=always <容器>`，不用重建 |
 | 想看实时日志（补充） | — | `docker logs -f <容器ID>` |
+| Nginx 起不来，报 `port is already allocated`（80 被占） | 宿主机 80 有别的服务在用 | 换宿主机端口 `-p 8090:80`，**`nginx.conf` 里的 `listen` 仍然写 80** |
+| 反向代理全部 404，但直接访问后端端口是好的 | `nginx.conf` 的 `listen` 写成了宿主机端口（如 81） | `listen` 永远写 `-p` 冒号**后面**那个容器端口（80） |
+| 反向代理报 502 Bad Gateway | `proxy_pass` 的主机名/端口写错，或容器不在同一网络 | 确认三个容器都加了 `--network tomcat_net`，`docker network inspect` 能看到它们 |
+| `host not found in upstream "tomcat01"` | 容器没加入同一个自定义网络 | 加 `--network` 重建容器；容器名拼写也要对 |
 
 ---
 
@@ -1962,5 +2027,6 @@ docker run -d -p 8081:8080 --name tomcat-01 \
 
 > **传统方式**：装 JDK → 配环境变量 → 装 Tomcat → 传项目 → 关防火墙（十几步，换机器重来）
 > **Docker 方式**：`docker pull` → `docker run -d -p 8080:8080 -v 目录 tomcat:8`（两步）
+> **Nginx 方式**：`docker network create` → 多台容器进同一网络 → Nginx 按路径（反向代理）或权重（负载均衡）统一分发（一个入口、多台后端）
 
 Docker 的价值不在"少敲几条命令"，而在于**环境是可复制、可传输的**：把自己调试好的环境打包成镜像，别人拉下来就能跑，不会出现"在我电脑上是好的"。后面做大型项目、做集群、做 CI/CD，都是建立在这个基础上的。
