@@ -14,7 +14,7 @@
               "type": "markdown",
               "state": {
                 "file": "最近笔记/FastAPI从入门到实战完整教程.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false,
                 "backlinks": false
               },
@@ -84,7 +84,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 200,
+    "collapsed": true
   },
   "right": {
     "id": "ec6b0fba11e9ed7d",
@@ -120,72 +121,37 @@
             }
           },
           {
-            "id": "192fac3308e956b2",
+            "id": "26eb99b368bcd6fc",
             "type": "leaf",
             "state": {
-              "type": "backlink",
+              "type": "claudian-view",
               "state": {
-                "file": "最近笔记/FastAPI从入门到实战完整教程.md",
-                "collapseAll": false,
-                "extraContext": false,
-                "sortOrder": "alphabetical",
-                "showSearch": false,
-                "searchQuery": "",
-                "backlinkCollapsed": false,
-                "unlinkedCollapsed": true
+                "tabWorkspace": {
+                  "version": 1,
+                  "openTabs": [
+                    {
+                      "tabId": "tab-1795665352295-7m18f8u",
+                      "conversationId": null,
+                      "draftModel": "deepseek:qwen-token-plan-cn/MiniMax-M2.5",
+                      "providerId": "deepseek"
+                    }
+                  ],
+                  "activeTabId": "tab-1795665352295-7m18f8u",
+                  "expandedTitleTabIds": [
+                    "tab-1795665352295-7m18f8u"
+                  ]
+                }
               },
-              "icon": "links-coming-in",
-              "title": "反向链接"
-            }
-          },
-          {
-            "id": "d66f01fde0f1bae4",
-            "type": "leaf",
-            "state": {
-              "type": "outgoing-link",
-              "state": {
-                "file": "最近笔记/FastAPI从入门到实战完整教程.md",
-                "linksCollapsed": false,
-                "unlinkedCollapsed": true
-              },
-              "icon": "links-going-out",
-              "title": "出链"
-            }
-          },
-          {
-            "id": "9ecd2393eb18ede2",
-            "type": "leaf",
-            "state": {
-              "type": "all-properties",
-              "state": {
-                "sortOrder": "frequency",
-                "showSearch": false,
-                "searchQuery": ""
-              },
-              "icon": "lucide-archive",
-              "title": "添加笔记属性"
-            }
-          },
-          {
-            "id": "e1144fb5558f8026",
-            "type": "leaf",
-            "state": {
-              "type": "tag",
-              "state": {
-                "sortOrder": "frequency",
-                "useHierarchy": true,
-                "showSearch": false,
-                "searchQuery": ""
-              },
-              "icon": "lucide-tags",
-              "title": "标签"
+              "icon": "bot",
+              "title": "Claudian"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 417.83331298828125
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -199,8 +165,11 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "8b60fb8f581da0ec",
+  "active": "1d0b0ab427e75e65",
   "lastOpenFiles": [
+    "最近笔记/Vue2课件.md",
+    "最近笔记/assets/FastAPI-01.png",
+    "最近笔记/FastAPI从入门到实战完整教程.md",
     "最近笔记/assets/FastAPI-01",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md",
     "笔记大全(备份)/Linux/Tomcat部署网页-虚拟机.md",
@@ -213,8 +182,6 @@
     "笔记大全(备份)/前端/VUE23项目创建.md",
     "笔记大全(备份)/其他技术",
     "笔记大全(备份)/Linux/Docker.md",
-    "最近笔记/Vue2课件.md",
-    "最近笔记/FastAPI从入门到实战完整教程.md",
     "最近笔记/django框架.md",
     "最近笔记/assets/git4区模型.png",
     "笔记大全(备份)/前端/Vue2课件.md",
@@ -240,12 +207,10 @@
     "最近笔记/assets/image7.png",
     "最近笔记/assets/image5.png",
     "最近笔记/assets/image6.png",
-    "最近笔记/assets/image4.png",
     "最近笔记/assets",
     "assets",
     "Django框架.docx",
     "毕业设计",
-    "未命名.base",
     "未命名.canvas"
   ]
 }

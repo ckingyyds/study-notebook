@@ -296,6 +296,8 @@ FastAPI自动生成交互式API文档：
 那网址和函数怎么关联起来呢:用装饰器
 在FastAPI中，路由通过装饰器定义:@app.get("/")。
 
+![[FastAPI-01.png]]
+
 ### HTTP请求方法
 
 FastAPI支持所有常用的HTTP方法：
