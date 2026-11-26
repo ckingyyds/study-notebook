@@ -10,7 +10,7 @@
 
 ## 一、Docker 到底解决什么问题
 
-上一份笔记里那套流程，自己也走了一遍：传 JDK、传 Tomcat、解压、挪目录、改 `/etc/profile`、`source`、启动、放网页、关防火墙……
+上一份笔记[[Tomcat部署网页-虚拟机]]里那套流程，自己也走了一遍：传 JDK、传 Tomcat、解压、挪目录、改 `/etc/profile`、`source`、启动、放网页、关防火墙……
 
 **麻烦在哪：**
 
@@ -33,7 +33,7 @@ docker run -d -p 8080:8080 --name tomcat-01 tomcat:8
 
 ## 二、安装 Docker
 
-按昨天笔记里的安装步骤一步步执行即可（装 docker-ce、启动服务、设置开机自启）。
+按完整笔记里的安装步骤一步步执行即可（装 docker-ce、启动服务、设置开机自启）。
 
 ### 2.1 装完之后一定要配"镜像加速器"
 
@@ -179,9 +179,9 @@ cf2340dcce4b   e2ac70e7319a   "/hello"                 Exited (0) 8 hours   ago 
 
 > 但它的 `IMAGE` 显示的是 `e2ac70e7319a` 这样一串 ID，而不是 `hello-world:latest`。说明 hello-world 镜像后来被删了，容器记录却还留着。这种情况删容器就行：
 >
-> ```bash
-> docker rm eloquent_morse
-> ```
+```bash
+docker rm eloquent_morse
+```
 
 **发现二：三个加速器地址，只有第一个还活着**
 

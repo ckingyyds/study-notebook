@@ -1311,11 +1311,11 @@ docker restart nginx
 
 **逐条解释**：
 
-| 指令 | 作用 |
-|---|---|
-| `upstream backend {}` | 定义服务器池，名字随便起，下面 `proxy_pass` 要引用 |
-| `server 地址:端口 weight=N` | 池里的一台机器，`weight` 是权重，越大分到的请求越多 |
-| `proxy_pass http://backend` | 转发到池子，Nginx 默认按**轮询 + 权重**分配请求 |
+| 指令                          | 作用                               |
+| --------------------------- | -------------------------------- |
+| `upstream backend {}`       | 定义服务器池，名字随便起，下面 `proxy_pass` 要引用 |
+| `server 地址:端口 weight=N`     | 池里的一台机器，`weight` 是权重，越大分到的请求越多   |
+| `proxy_pass http://backend` | 转发到池子，Nginx 默认按**轮询 + 权重**分配请求   |
 
 > **分配比例怎么算**？上面 3 台权重是 1:1:2，总共 4 份。每来 4 个请求，server1 拿 1 个，server2 拿 1 个，server3 拿 2 个。配置高的机器可以给大权重。
 
