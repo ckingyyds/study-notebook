@@ -1070,6 +1070,7 @@ docker run -d \
 - **logs**：访问日志 `access.log` 和错误日志 `error.log` 直接躺在宿主机，`tail -f` 就能实时看，排查问题必备
 
 ```bash
+# 执行
 # 创建目录结构
 mkdir -p /data/nginx/html
 mkdir -p /data/nginx/conf
@@ -1178,6 +1179,8 @@ curl http://localhost
 
 打开浏览器，访问 `http://虚拟机IP`，如果看到 Nginx 默认页面或自定义页面，说明安装成功。
 
+再放一个网页进去测试
+
 ### 11.6 Nginx 配置说明
 
 > **先建立整体认知**：Nginx 的配置是**层层嵌套**的，像套娃一样：
@@ -1267,13 +1270,13 @@ docker restart nginx
 
 **逐条解释**：
 
-| 指令 | 作用 | 为什么必须写 |
-|---|---|---|
-| `proxy_pass` | 转发目标地址 | 核心指令，没有它就不是反向代理了 |
-| `Host $host` | 传递原始域名 | 后端 Django 可能要根据 Host 判断用哪个配置，不转会丢信息 |
-| `X-Real-IP` | 真实客户端 IP | 不写的话，后端拿到的 IP 全是 Nginx 的，日志里看不到真实用户 |
-| `X-Forwarded-For` | 代理链路 IP | 经过多层代理时，记录完整路径，方便排查 |
-| `X-Forwarded-Proto` | 原始协议 | 后端要知道用户是 http 还是 https 访问的，否则跳转链接会出错 |
+| 指令                  | 作用       | 为什么必须写                               |
+| ------------------- | -------- | ------------------------------------ |
+| `proxy_pass`        | 转发目标地址   | 核心指令，没有它就不是反向代理了                     |
+| `Host $host`        | 传递原始域名   | 后端 Django 可能要根据 Host 判断用哪个配置，不转会丢信息  |
+| `X-Real-IP`         | 真实客户端 IP | 不写的话，后端拿到的 IP 全是 Nginx 的，日志里看不到真实用户  |
+| `X-Forwarded-For`   | 代理链路 IP  | 经过多层代理时，记录完整路径，方便排查                  |
+| `X-Forwarded-Proto` | 原始协议     | 后端要知道用户是 http 还是 https 访问的，否则跳转链接会出错 |
 
 > **开发必知**：这 4 个 `proxy_set_header` 几乎是**反向代理的标配**，写 Django/Flask 项目时，`request.META['REMOTE_ADDR']` 能不能拿到真实 IP，就靠 `X-Real-IP` 和 `X-Forwarded-For`。
 
