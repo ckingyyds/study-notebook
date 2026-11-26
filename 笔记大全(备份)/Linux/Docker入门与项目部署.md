@@ -1141,8 +1141,8 @@ docker images          # tomcat:8 又回来了
 ### 13.3 命令
 
 ```bash
-docker run -d -p 8080:8080 --name tomcat-01 \
-  -v /root/webapps:/usr/local/tomcat/webapps \
+docker run -d -p 8081:8080 --name tomcat-01 \
+  -v /home/zyc/dist:/usr/local/tomcat/webapps/ROOT \
   tomcat:8
 ```
 
