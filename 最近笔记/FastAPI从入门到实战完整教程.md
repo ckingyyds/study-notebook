@@ -299,7 +299,7 @@ FastAPI自动生成交互式API文档：
 ![[FastAPI-01.png]]
 
 
-
+同一张图,测试一下图片路径对上传的影响
 ![FastAPI-01](assets/FastAPI-01.png)
 
 ### HTTP请求方法
