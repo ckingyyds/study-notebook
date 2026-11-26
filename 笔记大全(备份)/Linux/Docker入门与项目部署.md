@@ -1217,23 +1217,24 @@ grep -o '<title>[^<]*</title>' index.html
 
 ### 容器相关
 
-| 命令 | 作用 |
-| :--- | :--- |
-| `docker run ...` | 用镜像启动容器（核心命令） |
-| `docker ps` | 查看运行中的容器 |
-| `docker ps -a` | 查看所有容器 |
-| `docker ps -q` / `-aq` | 只输出 ID |
-| `docker stop <ID>` | 停止 |
-| `docker start <ID>` | 启动 |
-| `docker restart <ID>` | 重启 |
-| `docker rm <ID>` | 删除容器 |
-| `docker logs <ID>` | 看容器输出（排错第一招） |
-| `docker exec -it <ID> bash` | 进入容器内部 |
-| `docker cp 源 容器ID:目标` | 宿主机 ↔ 容器传文件 |
-| `docker commit -m "..." -a "..." 容器 新镜像` | 把容器打包成镜像 |
-| `docker top <ID>` | 看容器内部的进程（容器视角，不受宿主机 pid namespace 干扰） |
-| `docker inspect <ID>` | 查看容器全部详情（挂载、端口、重启策略、IP） |
-| `docker update --restart=always <ID>` | 改重启策略，**不用重建容器** |
+| 命令                                       | 作用                                           |
+| :--------------------------------------- | :------------------------------------------- |
+| `docker run ...`                         | 用镜像启动容器（核心命令）                                |
+| `docker ps`                              | 查看运行中的容器                                     |
+| `docker ps -a`                           | 查看所有容器                                       |
+| `docker ps -q` / `-aq`                   | 只输出 ID                                       |
+| `docker stop <ID>`                       | 停止                                           |
+| `docker start <ID>`                      | 启动                                           |
+| `docker restart <ID>`                    | 重启                                           |
+| `docker rm <ID>`                         | 删除容器                                         |
+| `docker logs <ID>`                       | 看容器输出（排错第一招）                                 |
+| `docker exec -it <ID> bash`              | 进入容器内部                                       |
+| `docker cp 源 容器ID:目标`                    | 宿主机 ↔ 容器传文件                                  |
+| `docker commit -m "..." -a "..." 容器 新镜像` | 把容器打包成镜像                                     |
+| `docker top <ID>`                        | 看容器内部的进程（容器视角，不受宿主机 pid namespace 干扰）        |
+| `docker inspect <ID>`                    | 查看容器全部详情（挂载、端口、重启策略、IP）                      |
+| `docker update --restart=always <ID>`    | 改重启策略，设置需要开机自启的容器,**不用重建容器**,设置restart为no则关闭 |
+|                                          |                                              |
 
 ### `docker run` 常用参数
 

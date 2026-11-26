@@ -4,24 +4,22 @@
     "type": "split",
     "children": [
       {
-        "id": "824e0c4598e698ab",
+        "id": "cae4bf0c4e34d958",
         "type": "tabs",
         "children": [
           {
-            "id": "a4ad3c7c17bb55fd",
+            "id": "d83358adf44bca76",
             "type": "leaf",
-            "pinned": true,
             "state": {
               "type": "markdown",
               "state": {
-                "file": "最近笔记/FastAPI从入门到实战完整教程.md",
+                "file": "笔记大全(备份)/Linux/Docker入门与项目部署.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": false
               },
-              "pinned": true,
               "icon": "lucide-file",
-              "title": "FastAPI从入门到实战完整教程"
+              "title": "Docker入门与项目部署"
             }
           }
         ]
@@ -103,7 +101,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "最近笔记/FastAPI从入门到实战完整教程.md",
+                "file": "笔记大全(备份)/Linux/Docker入门与项目部署.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
@@ -166,10 +164,11 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "a4ad3c7c17bb55fd",
+  "active": "d83358adf44bca76",
   "lastOpenFiles": [
-    "最近笔记/django框架.md",
+    "笔记大全(备份)/Linux/Docker.md",
     "最近笔记/FastAPI从入门到实战完整教程.md",
+    "最近笔记/django框架.md",
     "最近笔记/assets/FastAPI-01 - 副本.jpg",
     "最近笔记/assets/FastAPI-01 - 副本.png",
     "最近笔记/assets/FastAPI-01.png",
@@ -185,7 +184,6 @@
     "笔记大全(备份)/Linux/Linux系统软件安装.md",
     "笔记大全(备份)/前端/VUE23项目创建.md",
     "笔记大全(备份)/其他技术",
-    "笔记大全(备份)/Linux/Docker.md",
     "最近笔记/assets/git4区模型.png",
     "笔记大全(备份)/前端/Vue2课件.md",
     "笔记大全(备份)/前端/JavaScript教程.md",
