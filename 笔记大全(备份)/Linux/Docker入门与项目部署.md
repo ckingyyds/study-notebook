@@ -1155,16 +1155,18 @@ docker run -d -p 8081:8080 --name tomcat-01 \
 1. 在宿主机上准备一个目录，把项目拷进去：
 
 ```bash
-mkdir -p /root/webapps
-cp -r /opt/tomcat8/webapps/mi /root/webapps/
+#这里是静态网页的方法,如果vue项目的话需要在Windows 执行 `npm run build` → `dist.zip` 传到 `/home/zyc/dist`
+mkdir -p /home/zyc/web
+cp -r /opt/tomcat8/webapps/dict /home/zyc/web
 ls /root/webapps        # mi
 ```
 
 2. 用 `-v` 参数启动容器：
 
 ```bash
-docker run -d -p 8080:8080 --name tomcat-01 \
-  -v /root/webapps:/usr/local/tomcat/webapps \
+#vue2项目
+docker run -d -p 8081:8080 --name tomcat-01 \
+  -v /home/zyc/dist:/usr/local/tomcat/webapps/ROOT \
   tomcat:8
 ```
 
@@ -1173,9 +1175,16 @@ docker run -d -p 8080:8080 --name tomcat-01 \
 4. **验证"热更新"**：在宿主机上改文件
 
 ```bash
-cd /root/webapps/mi
-vi index.html
-# 把 <title> 里的内容改一下，:wq 保存
+cd /home/zyc/dist
+
+# 先看看现在的标题是什么
+grep -o '<title>[^<]*</title>' index.html
+
+# 改掉它
+sed -i 's#<title>.*</title>#<title>热更新成功</title>#' index.html
+
+# 确认改上了
+grep -o '<title>[^<]*</title>' index.html
 ```
 
 5. 浏览器直接刷新（**没有重启容器、没有重新拷贝**）→ 页面标题变了。
