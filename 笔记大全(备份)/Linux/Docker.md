@@ -1247,8 +1247,7 @@ docker restart nginx
 
 为什么叫"反向"代理？打个比方：
 - **正向代理**：你翻墙用的 VPN，你知道真实服务器是谁，代理替你访问。
-- **反向代理**：用户只知道 Nginx，不知道后面的 Django 是谁。Nginx 像前台接待，把请求转给后台的开发。
-
+- **反向代理**：用户只知道 Nginx，不知道后面的 Django 是谁。Nginx 像前台接待，把请求转给后台的开发。what,不太懂
 ```bash
 sudo tee /data/nginx/conf/proxy.conf <<-'EOF'
 server {
