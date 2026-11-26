@@ -298,7 +298,9 @@ FastAPI自动生成交互式API文档：
 
 ![[FastAPI-01.png]]
 
-![FastAPI-01](assets\FastAPI-01.png)
+
+
+![FastAPI-01](assets/FastAPI-01.png)
 
 ### HTTP请求方法
 
