@@ -1028,28 +1028,43 @@ npm install --registry=https://registry.npmmirror.com
 
 **思路**：把"已经发布好项目的容器"重新打包成一个**新镜像**，以后直接运行这个新镜像，项目就在里面了。
 
+因为你当前的 `tomcat-01` 是通过 `-v` 挂载的，而 `docker commit` 只打包容器的**可写层**，挂载进去的目录属于宿主机，不会被写进镜像中。所以这样提交时，`webapps/ROOT` 在镜像里会是空的。我们创个新容器解决
+
+核心是：**再开一个不挂载的容器，用 `cp` 把文件放进去，然后对它执行 commit**。
+
+
 ```bash
-docker commit -m "描述信息" -a "作者" <容器ID或名字> <新镜像名:tag>
-```
+# 1. 起一个干净的临时容器（不挂载），端口用 8082
+docker run -d -p 8082:8080 --name tomcat-cp tomcat:8
 
-课上实际执行（把 `tomcat-01` 打包成 `tomcat-mi`）：
+# 2. 把 dist 拷进去，注意结尾的 /. 表示"拷目录里的内容"
+docker cp /home/zyc/dist/. tomcat-cp:/usr/local/tomcat/webapps/ROOT
 
-```bash
-docker commit -m "mi project" -a "2617" tomcat-01 tomcat-mi
-```
+# 3. 验证一下（浏览器打开也该是购物车）
+curl -s http://localhost:8082/ | head -5
 
+# 4. 打包成新镜像
+docker commit -m "cart project" -a "zyc" tomcat-cp tomcat-cart:v1
 - `-m`：提交说明（message）
 - `-a`：作者（author）
 - 最后两个：**源容器** 和 **新镜像名**
 
-然后：
+# 5. 临时容器用完就删，把 8082 腾出来
+docker rm -f tomcat-cp
 
-```bash
-docker images          # 多了一个 tomcat-mi
-docker run -d -p 8080:8080 --name tomcat-mi-01 tomcat-mi
+# 6. 用新镜像直接跑，注意：没有 -v，也没有 cp
+docker run -d -p 8082:8080 --name tomcat-cart tomcat-cart:v1
+
+# 7. 访问 IP:8082，应该直接是购物车
 ```
 
-直接访问 `IP:8080/mi/index.html` 就能看到项目，**不用再 cp**。
+第 6 步就是这一节想说明的：**一条 `docker run` 就把项目带走了，不用再 `cp`。**
+
+```bash
+docker images
+# 会多出 tomcat-cart  v1  xxxxx  刚刚  4xxMB（比原来的大几MB，项目进去了）
+```
+
 
 ### 11.1 commit 的局限（重要）
 
