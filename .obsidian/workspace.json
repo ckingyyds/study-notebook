@@ -84,8 +84,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200,
-    "collapsed": true
+    "width": 200
   },
   "right": {
     "id": "ec6b0fba11e9ed7d",
@@ -200,8 +199,9 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "a4ad3c7c17bb55fd",
+  "active": "8b60fb8f581da0ec",
   "lastOpenFiles": [
+    "最近笔记/assets/FastAPI-01",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md",
     "笔记大全(备份)/Linux/Tomcat部署网页-虚拟机.md",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md~RF6087da.TMP",
