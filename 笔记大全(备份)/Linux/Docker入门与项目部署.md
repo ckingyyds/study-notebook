@@ -1066,7 +1066,7 @@ docker images
 ```
 
 
-### 11.1 commit 的局限（重要）
+11.1 commit 的局限（重要）
 
 | 场景 | commit 合适吗 |
 | :--- | :--- |
