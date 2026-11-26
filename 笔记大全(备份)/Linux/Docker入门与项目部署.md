@@ -1067,7 +1067,7 @@ docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' tomcat-01
 
 ---
 
-## 十五、前端项目（Vue）怎么放进容器
+## 十五、进阶：前端项目（Vue）怎么放进容器
 
 > ⚠️ **这一章是专项，只跟前端项目有关**：只讲 Vue / React 这类**需要编译**的项目怎么放进容器。
 > 如果你的项目就是普通网页（html + css + js），第十章的做法已经够用了，可以跳过。
