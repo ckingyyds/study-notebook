@@ -212,9 +212,11 @@ from fastapi import FastAPI
 # 创建FastAPI实例
 app = FastAPI()
 
+#这是上面的简单点的接口
 # 定义路由
 @app.get("/")
-def read_root():
+# 异步函数
+async def read_root():
     return {"message": "Hello, FastAPI!"}
 ```
 
@@ -234,7 +236,7 @@ uvicorn main:app --reload
 参数说明：
 - `main`：Python文件名（不含`.py`）
 - `app`：FastAPI实例名
-- `--reload`：开发模式，文件修改后自动重启
+- `--reload`：开发模式，文件修改后自动重启,最好加上
 
 ### 访问服务
 
