@@ -974,7 +974,7 @@ CONTAINER ID   IMAGE   COMMAND                  PORTS                           
 1c2f3a9e5b7d   nginx   "/docker-entrypoint.…"   0.0.0.0:80->80/tcp, :::80->80/tcp   nginx01
 ```
 
-浏览器打开 `http://虚拟机IP`（不用写端口），看到：
+浏览器打开 `http://虚拟机IP`（不用写端口,写80端口也可以），看到：
 
 > **Welcome to nginx!**
 > If you see this page, the nginx web server is successfully installed and working…
@@ -1031,13 +1031,35 @@ cat index.html
 
 我的项目是宿主机上的 `/home/zyc/web/dict`。
 
-**方式一：`docker cp`（和第十章一样）**
+#### 先把宿主机上的项目准备好
+
+第一次做的话，这个目录大概率还不存在，先看一眼：
 
 ```bash
-exit                              # 先退出容器
-cp -r /home/zyc/web/dict .        # 确保宿主机当前目录下有 dict
-docker cp ./dict nginx01:/usr/share/nginx/html/
+ls /home/zyc/web/dict
 ```
+
+没有就从宿主机版 Tomcat 的 `webapps` 里复制一份过来：
+
+```bash
+mkdir -p /home/zyc/web
+cp -r /opt/tomcat8/webapps/dict /home/zyc/web/
+ls /home/zyc/web/dict        # 确认里面有 index.html 之类
+```
+
+> 为什么不直接用 `/opt/tomcat8/webapps/dict`？因为那是**宿主机 Tomcat** 的目录，那边还要留着用。单独拿一份出来，两边互不干扰。
+
+**方式一：`docker cp`**
+
+```bash
+exit    # 如果还在容器里，先退出来
+
+docker cp /home/zyc/web/dict nginx01:/usr/share/nginx/html/
+```
+
+`docker cp` **直接吃绝对路径**，不需要先 `cd` 到项目目录、也不需要先 `cp` 一份到当前目录。
+
+> 课上老师写的是先 `cd /opt/tomcat8/webapps`、再 `docker cp ./mi ...`，那是因为他人就在那个目录里。相对路径能用，但更容易错——像 `cp -r /home/zyc/web/dict .` 这种"先复制到当前目录"的步骤完全是多余的，末尾那个 `.` 少打一个就报 `cp: 缺少了要操作的目标文件`。
 
 访问 `http://虚拟机IP/dict/` 就能看到项目首页。
 
