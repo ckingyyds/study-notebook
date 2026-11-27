@@ -927,6 +927,33 @@ sudo ss -lntp | grep ':80 '
 
 如果 `80` 那条**什么都没有**，直接用它；如果被占了（老师机器上就被别的服务占了，只好改用 81），就换个宿主端口，比如 `-p 8090:80`。
 
+#### 我之前在虚拟机上装过 Nginx，现在没在跑——要不要紧
+
+**要紧。** 服务停着不等于安全：如果它设了开机自启，虚拟机一重启它就会自动起来把 80 抢走，那时候 Docker 的 nginx 就起不来了，报 `port is already allocated`。
+
+我就是这种情况（早年 `yum` 装过 Nginx，服务停着）。先确认三件事：
+
+```bash
+systemctl status nginx      # 现在是不是 inactive (dead)
+systemctl is-enabled nginx  # 关键：是不是 enabled（开机自启）
+ps -ef | grep [n]ginx       # 有没有残留进程
+```
+
+- 第一行 `inactive (dead)` + 第二行 `enabled` → **危险**，重启后会抢 80
+- 两个都是 `disabled` / `not-found` → 放心用 80
+
+彻底关掉（停止 + 取消自启，一步到位）：
+
+```bash
+sudo systemctl disable --now nginx
+```
+
+> 注意 `--now` 等于同时执行 `stop`：`systemctl disable --now nginx` = `stop` + `disable`。
+>
+> 也可以反过来：**宿主机 Nginx 留着不动，Docker 的 Nginx 换端口** `-p 8090:80`（`nginx.conf` 里的 `listen` 仍然写 `80`，别写成 8090——这就是 14.12 那个坑）。
+>
+> 两种方案都能跑，区别只是"谁的 Nginx 对用户可见"。本章按前一种写（Docker 用 80），因为它跟课上的演示最一致。
+
 我这台机器 80 是空的，所以：
 
 ```bash
