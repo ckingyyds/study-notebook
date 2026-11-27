@@ -29,7 +29,7 @@
               "type": "markdown",
               "state": {
                 "file": "最近笔记/django框架.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false,
                 "backlinks": false
               },
@@ -37,8 +37,7 @@
               "title": "django框架"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -117,7 +116,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "最近笔记/django框架.md",
+                "file": "最近笔记/FastAPI从入门到实战完整教程.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
@@ -242,15 +241,15 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "2611cec0b9e870eb",
+  "active": "eba38f9755abd184",
   "lastOpenFiles": [
+    "最近笔记/django框架.md",
     "最近笔记/FastAPI从入门到实战完整教程.md",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md",
     "笔记大全(备份)/Linux/Docker.md",
     "笔记大全(备份)/Linux/虚拟机环境清单.md",
     "笔记大全(备份)/Linux/Tomcat部署网页-虚拟机.md",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md~RF234e76a.TMP",
-    "最近笔记/django框架.md",
     "最近笔记/assets/FastAPI-01 - 副本.jpg",
     "最近笔记/assets/FastAPI-01 - 副本.png",
     "最近笔记/assets/FastAPI-01.png",
