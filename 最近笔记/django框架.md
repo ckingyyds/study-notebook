@@ -106,17 +106,18 @@ $ cd HelloWorld/
 $ tree
 .
 |-- HelloWorld
-|   |-- __init__.py
-|   |-- asgi.py
-|   |-- settings.py
-|   |-- urls.py
-|   -- wsgi.py -- manage.py
+|   |-- __init__.py  不碰
+|   |-- asgi.py  部署时才管
+|   |-- settings.py  天天改
+|   |-- urls.py  经常改
+|   -- wsgi.py   部署时才管
+|-- manage.py  基本不动
 ```
 
 目录说明：
 
 - HelloWorld: 项目的容器。
-- manage.py: 一个实用的命令行工具，可让你以各种方式与该 Django 项目进行交互。
+- manage.py: 一个实用的命令行工具，可让你以各种方式与该 Django 项目进行交互-----启动项目 创建项目 数据迁移。
 - HelloWorld/__init__.py: 一个空文件，告诉 Python 该目录是一个 Python 包。
 - HelloWorld/asgi.py: 一个 ASGI 兼容的 Web 服务器的入口，以便运行你的项目。
 - HelloWorld/settings.py: 该 Django 项目的设置/配置。
