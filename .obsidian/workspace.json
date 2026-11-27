@@ -4,12 +4,13 @@
     "type": "split",
     "children": [
       {
-        "id": "2a47945610299fad",
+        "id": "5d55751ee7fbe681",
         "type": "tabs",
         "children": [
           {
-            "id": "eba38f9755abd184",
+            "id": "00e5b2a2c1acaf7b",
             "type": "leaf",
+            "pinned": true,
             "state": {
               "type": "markdown",
               "state": {
@@ -18,26 +19,45 @@
                 "source": false,
                 "backlinks": false
               },
+              "pinned": true,
               "icon": "lucide-file",
               "title": "FastAPI从入门到实战完整教程"
             }
           },
           {
-            "id": "2611cec0b9e870eb",
+            "id": "31cf8e4d53670d91",
             "type": "leaf",
+            "pinned": true,
             "state": {
               "type": "markdown",
               "state": {
                 "file": "最近笔记/django框架.md",
-                "mode": "preview",
+                "mode": "source",
+                "source": false,
+                "backlinks": false
+              },
+              "pinned": true,
+              "icon": "lucide-file",
+              "title": "django框架"
+            }
+          },
+          {
+            "id": "7017df7720138627",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "2026-11-27.md",
+                "mode": "source",
                 "source": false,
                 "backlinks": false
               },
               "icon": "lucide-file",
-              "title": "django框架"
+              "title": "2026-11-27"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -116,7 +136,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "最近笔记/FastAPI从入门到实战完整教程.md",
+                "file": "2026-11-27.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
@@ -241,19 +261,27 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "eba38f9755abd184",
+  "active": "7017df7720138627",
   "lastOpenFiles": [
-    "最近笔记/django框架.md",
+    "最近笔记/Vue2课件.md",
     "最近笔记/FastAPI从入门到实战完整教程.md",
+    "2026-11-27.md",
+    "Pasted image 20261127144804 1.png",
+    "Pasted image 20261127144804.png",
+    "Pasted image 20261127144803 7.png",
+    "Pasted image 20261127144803 6.png",
+    "Pasted image 20261127144803 5.png",
+    "Pasted image 20261127144803 4.png",
+    "Pasted image 20261127144803 3.png",
+    "Pasted image 20261127144803 2.png",
+    "Pasted image 20261127144803 1.png",
+    "Pasted image 20261127144803.png",
+    "最近笔记/django框架.md",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md",
     "笔记大全(备份)/Linux/Docker.md",
     "笔记大全(备份)/Linux/虚拟机环境清单.md",
     "笔记大全(备份)/Linux/Tomcat部署网页-虚拟机.md",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md~RF234e76a.TMP",
-    "最近笔记/assets/FastAPI-01 - 副本.jpg",
-    "最近笔记/assets/FastAPI-01 - 副本.png",
-    "最近笔记/assets/FastAPI-01.png",
-    "最近笔记/Vue2课件.md",
     "最近笔记/assets/FastAPI-01",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md~RF6087da.TMP",
     "笔记大全(备份)/Linux/白马Linux课程笔记.md",
@@ -263,7 +291,6 @@
     "笔记大全(备份)/Linux/Linux系统软件安装.md",
     "笔记大全(备份)/前端/VUE23项目创建.md",
     "笔记大全(备份)/其他技术",
-    "最近笔记/assets/git4区模型.png",
     "笔记大全(备份)/前端/Vue2课件.md",
     "笔记大全(备份)/前端/JavaScript教程.md",
     "笔记大全(备份)/前端/JavaScript教程 1.md",
@@ -276,15 +303,8 @@
     "笔记大全(备份)/Linux/全第6章_Nginx实战部署.md",
     "笔记大全(备份)/Linux/全第3章_进程与服务管理.md",
     "笔记大全(备份)/Linux/全第1章2_基础与环境搭建.md",
-    "笔记大全(备份)/Python/Python高级笔记.md",
     "新建 文本文档.txt",
-    "最近笔记/assets/image3.png",
-    "最近笔记/assets/image1.png",
-    "最近笔记/assets/bdd5e22178df4025f305ee1dc62cbcaf.png",
     "__wtest",
-    "最近笔记/assets/image8.png",
-    "最近笔记/assets/image9.png",
-    "最近笔记/assets/image7.png",
     "最近笔记/assets",
     "assets",
     "Django框架.docx",

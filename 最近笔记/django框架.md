@@ -185,7 +185,7 @@ HelloWorld
 |   |-- apps.py
 ```
 
-- migrations 数据库迁移记录，不需要操作，会自动生成
+- migrations 数据库迁移文件存放目录，不需要操作，会自动生成
 - views.py 视图函数编写文件 <span style="color:#da3330">经常操作</span>
 - models.py 数据库相关操作 类->SQL(ORM) <span style="color:#da3330">经常操作</span>
 - apps.py APP的名字 不需要操作
