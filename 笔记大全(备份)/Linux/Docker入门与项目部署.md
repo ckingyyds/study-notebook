@@ -1193,33 +1193,44 @@ docker network inspect tomcat_net
 }
 ```
 
-**第四步：起 Nginx，也加入这个网络**
+**第四步：把 Nginx 的配置拷到宿主机**
 
-先把配置文件从容器里拷出来（容器里没 `vi`，必须在宿主机改好再挂进去）：
+容器里没有 `vi`，配置必须在宿主机改好再挂进去。
+
+⚠️ 要改的**不是 `nginx.conf`，而是 `conf.d/default.conf`** —— 默认那个 `server { listen 80; }` 就写在这个文件里。两个文件都写 `listen 80` 会冲突，Nginx 会忽略其中一个，结果你加的 `location` 根本没生效（表现就是一访问就 404，页脚是 `nginx/1.31.10`）。
 
 ```bash
-# 用一次性容器把默认配置拷出来
-docker cp nginx01:/etc/nginx/nginx.conf ./nginx.conf   2>/dev/null || \
-docker run --rm nginx cat /etc/nginx/nginx.conf > nginx.conf
-
 mkdir -p /home/zyc/nginx
-mv nginx.conf /home/zyc/nginx/
+docker cp nginx01:/etc/nginx/conf.d/default.conf /home/zyc/nginx/default.conf
+cat /home/zyc/nginx/default.conf        # 看一眼，认得里面那个 server 块
 ```
 
-然后带着挂载启动：
+> 如果 `nginx01` 还没建，用一次性容器拷：
+> ```bash
+> docker run --rm nginx cat /etc/nginx/conf.d/default.conf > /home/zyc/nginx/default.conf
+> ```
+
+**第五步：起 Nginx，两处挂载 + 加入同一网络**
 
 ```bash
 docker rm -f nginx01
 
 docker run -d -p 80:80 --name nginx01 \
   --network tomcat_net --restart=always \
-  -v /home/zyc/nginx/nginx.conf:/etc/nginx/nginx.conf \
+  -v /home/zyc/nginx/default.conf:/etc/nginx/conf.d/default.conf \
+  -v /home/zyc/web:/usr/share/nginx/html \
   nginx
 ```
 
-> 这里**只挂 `nginx.conf` 一个文件**。想连网页一起挂，再加一条 `-v /home/zyc/web/dict:/usr/share/nginx/html`。
+这里每一个参数都不能少：
 
-**第五步：四台都在跑**
+| 参数 | 少了会怎样 |
+| :--- | :--- |
+| `--network tomcat_net` | 解析不到 `tomcat01` 这些容器名，**Nginx 直接起不来**，报 `host not found in upstream` |
+| `-v …/default.conf:/etc/nginx/conf.d/default.conf` | 你在宿主机改的配置进不到容器里，`location` 全部无效 → **一直 404** |
+| `-v /home/zyc/web:/usr/share/nginx/html` | 图片、css 这类静态资源找不到；不影响反向代理本身，但访问 `IP/` 会看到 Nginx 的欢迎页 |
+
+**第六步：四台都在跑**
 
 ```bash
 docker ps
@@ -1233,42 +1244,77 @@ CONTAINER ID   IMAGE     PORTS                     NAMES
 …              tomcat:8  0.0.0.0:8083->8080/tcp    tomcat03
 ```
 
-先单独验证三个都能打开：`IP:8081/dict/`、`IP:8082/dict/`、`IP:8083/dict/`，**都是同一个页面就是对的**。
+先单独验证三台都能打开：`IP:8081/site/`、`IP:8082/site/`、`IP:8083/site/`，**三个都是同一个页面就是对的**。
 
-### 14.8 配置 `nginx.conf`：把路径转发出去
+> 我的站点目录是 `/home/zyc/web/site`（里面一个 `index.html`），三台挂的都是 `/home/zyc/web`，所以后端路径里要带一层 `site/`。你的项目叫什么，就换成什么。
 
-打开 `/home/zyc/nginx/nginx.conf`，找到 `http { ... }` 块，在里面加一个 `server`：
+### 14.8 配置 `default.conf`：把路径转发出去
+
+打开 `/home/zyc/nginx/default.conf`，它原本长这样：
 
 ```nginx
-http {
-    # …… 中间原来那一堆 include、log_format 都不用动 ……
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  localhost;
 
-    server {
-        listen       80;
-        server_name  _;
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
 
-        location /dict {
-            proxy_pass http://tomcat01:8080;
-        }
-
-        location /jd {
-            proxy_pass http://tomcat02:8080;
-        }
-
-        location /tb {
-            proxy_pass http://tomcat03:8080;
-        }
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
     }
 }
 ```
+
+**只需要在 `location / { … }` 后面加三个 `location`**，其余原样不动。
+
+在 `vi` 里挪光标容易改错括号，最省事的是整份覆盖：
+
+```bash
+cat > /home/zyc/nginx/default.conf <<'EOF'
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  localhost;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
+
+    location /t1/ { proxy_pass http://tomcat01:8080/site/; }
+    location /t2/ { proxy_pass http://tomcat02:8080/site/; }
+    location /t3/ { proxy_pass http://tomcat03:8080/site/; }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}
+EOF
+```
+
+写一行是为了不搞错缩进和括号，Nginx 不在乎换行。
 
 逐行解释：
 
 | 写法 | 意思 |
 | :--- | :--- |
 | `listen 80` | Nginx **自己在容器里**监听 80 |
-| `location /dict` | 用户访问的路径以 `/dict` 开头 |
-| `proxy_pass http://tomcat01:8080` | 转给 `tomcat01` 这个容器的 8080 |
+| `location /t1/` | 用户访问的路径以 `/t1/` 开头 |
+| `proxy_pass http://tomcat01:8080/site/` | 转给 `tomcat01` 容器的 8080，并且**把 `/t1/` 换成 `/site/`** |
+
+也就是：
+
+```text
+用户访问   http://IP/t1/
+Nginx 收到  /t1/
+转发出去   http://tomcat01:8080/site/
+```
 
 **为什么能写 `tomcat01` 这个名字？** 因为 Nginx 容器和 tomcat01 在同一个 `tomcat_net` 网络里，Docker 内置了 DNS，容器名就能直接解析成 IP。没加 `--network` 的话这里会报 `host not found in upstream`。
 
@@ -1276,15 +1322,10 @@ http {
 
 ### 14.9 重启生效，然后验证
 
-配置改完必须让 Nginx 重新加载：
+先测语法（不会影响正在跑的容器）：
 
 ```bash
-docker restart nginx01
-```
-
-```bash
-docker ps                                  # 四个都是 Up
-docker exec nginx01 nginx -t               # 测配置语法
+docker exec nginx01 nginx -t
 ```
 
 ```text
@@ -1292,32 +1333,55 @@ nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
 nginx: configuration file /etc/nginx/nginx.conf test is successful
 ```
 
+上面这段是成功。如果报错，它会告诉你错在第几行，先去改好再重启。
+
+语法 OK 再重载：
+
+```bash
+docker restart nginx01
+docker ps                                  # 四个都应该是 Up
+```
+
 然后浏览器：
 
 ```text
-http://虚拟机IP/dict/     →  8081 那台的项目
-http://虚拟机IP/jd/       →  8082 那台
-http://虚拟机IP/tb/       →  8083 那台
+http://虚拟机IP/t1/     →  tomcat01（8081）的项目
+http://虚拟机IP/t2/     →  tomcat02（8082）
+http://虚拟机IP/t3/     →  tomcat03（8083）
 ```
 
 **一个入口、三个项目**，反向代理就跑通了。
 
-> （补充）如果报 `502 Bad Gateway`，九成是 `proxy_pass` 里的主机名/端口写错了，或者容器不在同一个网络；如果报 `404`，是路径没对上（`proxy_pass` 后面带不带斜杠会影响路径拼接方式，见下一节的说明）。
+#### 404 是谁给的？看页脚就知道
+
+这一步最容易卡住，判断方法看页面最下面那行字：
+
+| 页脚 | 谁返回的 | 说明 |
+| :--- | :--- | :--- |
+| `nginx/1.31.10` | **Nginx 自己** | 请求**根本没被转发出去**：配置没生效 / 没挂进容器 / `location` 没匹配上 |
+| `Apache Tomcat/8.5.100` | 后端 Tomcat | **转发成功了**，只是后端那个路径下没东西（`/site/` 写错，或项目没拷进 `webapps`） |
+
+一句话：
+
+> **看到 Tomcat 的 404，说明代理是通的，只是路径错了；看到 Nginx 的 404，说明代理压根没生效。**
+
+（补充）`502 Bad Gateway` 是另一类问题：`proxy_pass` 里的主机名/端口写错，或者容器不在同一个网络 —— 也就是 Nginx 连得上前端、连不上后端。
 
 #### `proxy_pass` 后面带不带斜杠的区别
 
 ```nginx
-location /dict {
-    proxy_pass http://tomcat01:8080;      # 转发时保留 /dict
+location /t1/ {
+    proxy_pass http://tomcat01:8080/site/;    # 把 /t1/ 换成 /site/
 }
-location /jd {
-    proxy_pass http://tomcat02:8080/;     # 转发时把 /jd 去掉
+location /t2/ {
+    proxy_pass http://tomcat02:8080;         # 原样保留 /t2/ 往后带
 }
 ```
-- 不带斜杠：`/jd/a.html` → 后端收到 `/jd/a.html`
-- 带斜杠：`/jd/a.html` → 后端收到 `/a.html`
 
-我的 `dict` 是个目录项目，访问 `/dict/` 要能对上 `webapps/dict/`，所以**不带斜杠**。
+- 带路径（`/site/`）：`/t1/a.html` → 后端收到 `/site/a.html`
+- 不带路径（`http://tomcat02:8080`）：`/t2/a.html` → 后端收到 `/t2/a.html`（后端得有 `t2` 这个目录，否则 404）
+
+我的项目目录叫 `site`，用前者更直观：对外叫 `t1/t2/t3`，对内都是 `/site/`。
 
 ### 14.10 负载均衡：三台跑同一个项目
 
