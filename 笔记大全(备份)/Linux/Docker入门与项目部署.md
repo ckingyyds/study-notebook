@@ -1032,6 +1032,9 @@ cat index.html
 我的项目是宿主机上的 `/home/zyc/web/dict`。
 
 #### 先把宿主机上的项目准备好
+```bash
+exit  #退出docker里的nginx
+```
 
 第一次做的话，这个目录大概率还不存在，先看一眼：
 
