@@ -57,7 +57,7 @@
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -136,7 +136,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "2026-11-27.md",
+                "file": "最近笔记/django框架.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
@@ -261,11 +261,13 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "7017df7720138627",
+  "active": "31cf8e4d53670d91",
   "lastOpenFiles": [
-    "最近笔记/Vue2课件.md",
-    "最近笔记/FastAPI从入门到实战完整教程.md",
     "2026-11-27.md",
+    "Pasted image 20261127145407.png",
+    "最近笔记/django框架.md",
+    "最近笔记/FastAPI从入门到实战完整教程.md",
+    "最近笔记/Vue2课件.md",
     "Pasted image 20261127144804 1.png",
     "Pasted image 20261127144804.png",
     "Pasted image 20261127144803 7.png",
@@ -275,8 +277,6 @@
     "Pasted image 20261127144803 3.png",
     "Pasted image 20261127144803 2.png",
     "Pasted image 20261127144803 1.png",
-    "Pasted image 20261127144803.png",
-    "最近笔记/django框架.md",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md",
     "笔记大全(备份)/Linux/Docker.md",
     "笔记大全(备份)/Linux/虚拟机环境清单.md",
