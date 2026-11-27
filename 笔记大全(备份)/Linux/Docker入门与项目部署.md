@@ -1500,6 +1500,80 @@ for i in 1 2 3 4 5 6; do curl -s http://localhost/ | grep 我是; done
 
 > （补充）刷新没变化的话，先 `Ctrl + F5` 强刷一次（浏览器缓存），或者直接看 `docker logs --tail 20 nginx01` 里的访问记录。
 
+#### ⚠️ 实验时踩到的三个坑（都是真实遇到的）
+
+**坑 1：Tomcat 报 400 —— `The character [_] is never valid in a domain name`**
+
+配好 `upstream` 后访问，浏览器出来的是 **Tomcat 的 400 页面**（页脚 `Apache Tomcat/8.5.100`，不是 nginx），我一开始还以为是代理没通。
+
+原因：nginx 转发时默认把请求的 `Host` 头改成 **upstream 的名字**，也就是 `tomcat_cluster`。而域名里**不能有下划线**（合法字符只有字母、数字、`-`、`.`），Tomcat 8.5 的 HTTP 解析器一看到 `_` 就直接拒绝，返回 400。
+
+```java
+java.lang.IllegalArgumentException: The character [_] is never valid in a domain name.
+    org.apache.tomcat.util.http.parser.HttpParser$DomainParseState.next(...)
+```
+
+修法是加一行，让转发时把头还原成用户访问的那个地址：
+
+```nginx
+server {
+    ...
+    proxy_set_header Host $host;          # $host = 用户访问用的域名/IP
+    proxy_set_header X-Real-IP $remote_addr;
+}
+```
+
+> 为什么 14.8 的反向代理没这个问题？因为那里写的是 `proxy_pass http://tomcat01:8080`，Host 是 `tomcat01:8080`，**没有下划线**，Tomcat 能接受。所以我一开始完全没意识到是 Host 的锅。
+>
+> 另一个办法是把 upstream 改名为 `tomcatcluster`（去掉下划线），但加 `proxy_set_header` 更通用、更符合实际运维习惯。
+
+**坑 2：重建了容器，nginx 还往旧 IP 发**
+
+我为了区分是哪台在响应，把三台容器删了重建（换成挂 `web1/web2/web3`），结果请求全落到 01 上。
+
+原因：`upstream` 里写的是**容器名**，nginx **只在启动那一刻解析一次**，之后一直用那个 IP。容器一删一建，IP 就变了，nginx 还拿着旧地址去连，连不上就跳过这台。
+
+一句话记住：
+
+> **凡是重建了 upstream 里的容器，就要 `docker restart nginx01` 一次。**
+
+验证配置是不是新解析的，可以看容器里解析到的 IP 是否与实际一致：
+
+```bash
+docker exec nginx01 getent hosts tomcat01 tomcat02 tomcat03
+docker inspect tomcat01 --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
+```
+
+**坑 3：连续请求时"轮询"看起来不严格**
+
+用 `for` 循环连发 9 次，结果是 `01 01 01 01 01 01 01 02 03 01` —— 看着像坏了。
+
+原因：nginx 默认 `worker_processes auto`（= CPU 核数），而 **upstream 的轮询状态是每个 worker 进程各管各的**（没配 `zone` 共享内存时）。请求被内核分到不同 worker 上，每个 worker 的**第一次选择都是第一台**，所以开头一串全是 01。
+
+判断方法不是看前几次，而是看**总量分布**：
+
+```bash
+for i in $(seq 1 30); do curl -s http://127.0.0.1/ | grep -o 'tomcat0[123]'; done | sort | uniq -c
+```
+
+```text
+     9 tomcat01
+    11 tomcat02
+    10 tomcat03
+```
+
+接近均分就是正常。想让肉眼看到严格 `01→02→03`，实验时可以临时把 worker 改成 1（**生产环境绝对不要**）：
+
+```bash
+docker exec nginx01 grep worker_processes /etc/nginx/nginx.conf
+```
+
+> 老师课上看到的是"01→02→03 严格轮转"，因为他**手动刷新浏览器**，间隔几秒，请求很可能落在同一个 worker 的连续位置上，所以看着顺。
+
+## 一句话总结这一节
+
+> 反向代理是"**按路径**分发"，负载均衡是"**按流量**分发"；两者都要求所有容器在**同一个自定义网络**里，Nginx 自己也要在这个网络里，`listen` 永远写容器端口（80），而不是宿主机映射端口。
+
 ### 14.11 权重与 ip_hash：两种分发策略
 
 #### 权重（weight）：按能力分活
