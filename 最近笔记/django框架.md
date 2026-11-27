@@ -223,7 +223,7 @@ python manage.py runserver 0.0.0.0:8080
 ## 路由分层
 
 在一个web项目中可能会有很多的业务单元，如果将所有的url全部维护在项目的urls.py文件中，后期路径的维护将会非常的不方便，所以后续在项目中可以将路由进行分层处理。
-
+          
 <span style="color:#00a64e">1.在子项目中创建一个urls.py文件,内容和根项目中保持一致</span>
 
 ```python
