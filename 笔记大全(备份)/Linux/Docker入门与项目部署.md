@@ -1156,6 +1156,7 @@ docker network inspect tomcat_net
 
 ```bash
 docker rm -f tomcat-01
+docker rm -f tomcat-02
 ```
 
 **第二步：起三台 Tomcat，都加入同一个网络**
@@ -1387,57 +1388,117 @@ location /t2/ {
 
 反向代理解决的是"**不同**项目走同一个入口"，负载均衡解决的是"**同一个**项目扛不住，分给多台"。
 
-> 注意区分：三台跑小米、京东、淘宝，那是反向代理；三台都跑小米，才叫**集群**，才谈得上负载均衡。
+> 注意区分：三台分别跑小米、京东、淘宝，那是反向代理；三台都跑同一个项目，才叫**集群**，才谈得上负载均衡。
 
-现在我的三台 Tomcat 已经挂着同一个 `dict` 了，就差让 Nginx 轮流分。
+#### 先声明一个集群
 
-在 `http {}` 里，**在 `server` 之前**声明一个 `upstream`：
+**最容易错的一点**：`upstream` 只能写在 `http {}` 里面。而我们的 `conf.d/default.conf` 本身**就是被 include 进 `http {}` 的**，所以这里直接写 `upstream`，**不要再套一层 `http {}`**，否则会报 `"http" directive is not allowed here`。
+
+把 `/home/zyc/nginx/default.conf` 改成：
 
 ```nginx
-http {
-    upstream tomcat_cluster {
-        server tomcat01:8080 weight=1;
-        server tomcat02:8080 weight=1;
-        server tomcat03:8080 weight=1;
+upstream tomcat_cluster {
+    server tomcat01:8080;
+    server tomcat02:8080;
+    server tomcat03:8080;
+}
+
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  localhost;
+
+    location / {
+        proxy_pass http://tomcat_cluster/site/;
     }
 
-    server {
-        listen       80;
-        server_name  _;
-
-        location / {
-            proxy_pass http://tomcat_cluster;
-        }
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
     }
 }
 ```
 
 | 写法 | 意思 |
 | :--- | :--- |
-| `upstream 名字 { ... }` | 声明一个集群，名字随便起，下面 `proxy_pass` 引用它 |
-| `server IP:端口 weight=N` | 集群里的一台，`weight` 是权重 |
-| `proxy_pass http://集群名` | 把请求交给这个集群，而不是某一台 |
+| `upstream 名字 { … }` | 声明一个集群，名字自己起，下面 `proxy_pass` 引用它 |
+| `server tomcat01:8080` | 集群里的一台（写容器名，靠 `tomcat_net` 解析） |
+| `proxy_pass http://集群名/site/` | 把请求交给这个集群里的一台，而不是写死某一台 |
 
-**权重都是 1 的时候，就是轮询**：第一个请求给 01，第二个给 02，第三个给 03，第四个又回 01。
+前面的三个 `location /t1/ /t2/ /t3/` 可以先留着，也可以注释掉——它们和这里不冲突，只是入口不同。
 
-#### 怎么"看"出请求到底给了哪台
+#### 权重都是 1，就是轮询
 
-三台内容一模一样，光看页面分不出来。所以要**做个小标记**。
+第一个请求给 tomcat01，第二个给 tomcat02，第三个给 tomcat03，第四个又回 tomcat01。
 
-我懒得改三份文件，直接给三台的 `dict/index.html` 加一行字（挂载的好处，改宿主机就三台同时变），但那样三台还是一样……所以换个办法：**分别改容器里的**：
+#### 怎么"看"出请求到底是哪台在响应
 
-```bash
-docker exec tomcat01 sh -c 'echo "<p>我是 tomcat01 (8081)</p>" >> /usr/local/tomcat/webapps/ROOT/index.html'
-```
+三台如果挂的是**同一个宿主机目录**（前面为了方便就是这么挂的），内容永远一模一样，光看页面分不出来。
 
-> 更简单的做法：三台**各自挂不同目录**，里面放内容略有差异的同一份项目。我这里图快，直接进容器改（注意这是临时改，容器删了就没了）。
-
-（补充）其实最省事的验证方式是不改页面，而是看 Nginx 的访问日志：
+所以要给三台**各挂一个目录**，各放一份、各加一行标记：
 
 ```bash
-docker logs -f nginx01
+# 1. 建三个目录，各复制一份项目
+mkdir -p /home/zyc/web1 /home/zyc/web2 /home/zyc/web3
+cp -r /home/zyc/web/site /home/zyc/web1/
+cp -r /home/zyc/web/site /home/zyc/web2/
+cp -r /home/zyc/web/site /home/zyc/web3/
+
+# 2. 各加一行自己认得出来的标记
+echo '<p>我是 tomcat01（8081）</p>' >> /home/zyc/web1/site/index.html
+echo '<p>我是 tomcat02（8082）</p>' >> /home/zyc/web2/site/index.html
+echo '<p>我是 tomcat03（8083）</p>' >> /home/zyc/web3/site/index.html
 ```
-每刷新一次，日志里就多一行，配合 `upstream` 的 `access_log` 能看到转给了哪台。
+
+> 挂载的好处在这里体现出来了：改的是宿主机上的文件，容器里立刻就是新的，**不用重启容器、不用重新拷贝**。
+
+然后重建三台，各挂自己的目录：
+
+```bash
+docker rm -f tomcat01 tomcat02 tomcat03
+
+docker run -d -p 8081:8080 --name tomcat01 \
+  --network tomcat_net --restart=always \
+  -v /home/zyc/web1:/usr/local/tomcat/webapps tomcat:8
+
+docker run -d -p 8082:8080 --name tomcat02 \
+  --network tomcat_net --restart=always \
+  -v /home/zyc/web2:/usr/local/tomcat/webapps tomcat:8
+
+docker run -d -p 8083:8080 --name tomcat03 \
+  --network tomcat_net --restart=always \
+  -v /home/zyc/web3:/usr/local/tomcat/webapps tomcat:8
+```
+
+先单独确认三台都对：`IP:8081/site/` 显示 tomcat01、`IP:8082/site/` 显示 tomcat02、`IP:8083/site/` 显示 tomcat03。
+
+#### 让配置生效并验证轮询
+
+```bash
+docker exec nginx01 nginx -t        # 先测语法
+docker restart nginx01
+```
+
+浏览器连着刷新 `http://192.168.153.134/`，会依次看到 tomcat01 → tomcat02 → tomcat03 → tomcat01……
+
+用 `curl` 更清楚（浏览器可能有缓存）：
+
+```bash
+for i in 1 2 3 4 5 6; do curl -s http://localhost/ | grep 我是; done
+```
+
+```text
+<p>我是 tomcat01（8081）</p>
+<p>我是 tomcat02（8082）</p>
+<p>我是 tomcat03（8083）</p>
+<p>我是 tomcat01（8081）</p>
+<p>我是 tomcat02（8082）</p>
+<p>我是 tomcat03（8083）</p>
+```
+
+六次请求严格按 01→02→03 循环，轮询就生效了。
+
+> （补充）刷新没变化的话，先 `Ctrl + F5` 强刷一次（浏览器缓存），或者直接看 `docker logs --tail 20 nginx01` 里的访问记录。
 
 ### 14.11 权重与 ip_hash：两种分发策略
 
@@ -1454,6 +1515,8 @@ upstream tomcat_cluster {
 四次请求里，大约两次给 01、一次给 02、一次给 03。
 
 **什么时候用**：三台机器配置不一样。性能强的权重大，不然轮询会让强的那台闲着、弱的那台扛不住。
+
+改完记得 `docker exec nginx01 nginx -t` 测一下再 `docker restart nginx01`。
 
 #### ip_hash：同一个用户锁死一台
 
@@ -1474,6 +1537,8 @@ upstream tomcat_cluster {
 
 `ip_hash` 按客户端 IP 算哈希，IP 不变，算出来的结果就不变，永远挑同一台。个人用户 IP 基本固定，问题就解决了。
 
+验证：重启 nginx 后连刷多次，标记**一直是同一个** tomcat。
+
 > 注意 `ip_hash` 和 `weight` 一般不同时用。还有第三种 `least_conn`（连接数少的多分点），单机演示看不出效果，知道有这回事就行。
 
 | 策略 | 适合 | 不适合 |
@@ -1483,6 +1548,14 @@ upstream tomcat_cluster {
 | `ip_hash` | **有登录的普通项目** | 用户都在同一个 NAT 后面（会全落到一台） |
 
 > （补充）生产上更常见的做法是**把 Session 外置**（存 Redis），这样三台就无状态了，什么策略都能用。这是后面学 Redis 时的正经解法，`ip_hash` 只是最省事的一种。
+
+#### 三种改法的对照（都写在一个文件里）
+
+| 想要的效果 | `upstream` 怎么写 |
+| :--- | :--- |
+| 轮询 | 三个 `server`，都不写 `weight`（或全写 `weight=1`） |
+| 按性能分配 | 加 `weight=N` |
+| 同一用户固定一台 | 第一行写 `ip_hash;`，其余 `server` 不加 `weight` |
 
 ### 14.12 ⚠️ 老师卡住的地方：`listen` 到底写 80 还是 81
 
