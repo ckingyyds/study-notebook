@@ -175,7 +175,7 @@ urlpatterns = [
 
 ## 启动项目
 
-```bash
+```bash 
 python manage.py runserver 0.0.0.0:8080
 ```
 
