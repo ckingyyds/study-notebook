@@ -42,7 +42,7 @@
             }
           },
           {
-            "id": "2c44085345433ae3",
+            "id": "187bd6c0092f5d84",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -55,9 +55,24 @@
               "icon": "lucide-file",
               "title": "Docker"
             }
+          },
+          {
+            "id": "706843c50eb5469b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "笔记大全(备份)/Linux/白马Linux课程笔记.md",
+                "mode": "preview",
+                "source": false,
+                "backlinks": false
+              },
+              "icon": "lucide-file",
+              "title": "白马Linux课程笔记"
+            }
           }
         ],
-        "currentTab": 2
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -136,7 +151,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "笔记大全(备份)/Linux/Docker.md",
+                "file": "笔记大全(备份)/Linux/白马Linux课程笔记.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
@@ -261,10 +276,14 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "2c44085345433ae3",
+  "active": "706843c50eb5469b",
   "lastOpenFiles": [
-    "最近笔记/django框架.md",
+    "笔记大全(备份)/Linux/Docker.md",
     "笔记大全(备份)/Linux/白马Linux课程笔记.md",
+    "最近笔记/django框架.md",
+    "笔记大全(备份)/其他技术/git简单使用.md",
+    "笔记大全(备份)/其他技术/assets/git4区模型.png",
+    "笔记大全(备份)/其他技术/assets",
     "2026-11-27.md",
     "最近笔记/FastAPI从入门到实战完整教程.md",
     "Pasted image 20261127150802.png",
@@ -277,9 +296,7 @@
     "Pasted image 20261127144803 5.png",
     "Pasted image 20261127144803 4.png",
     "Pasted image 20261127144803 3.png",
-    "Pasted image 20261127144803 2.png",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md",
-    "笔记大全(备份)/Linux/Docker.md",
     "笔记大全(备份)/Linux/虚拟机环境清单.md",
     "笔记大全(备份)/Linux/Tomcat部署网页-虚拟机.md",
     "笔记大全(备份)/Linux/Docker入门与项目部署.md~RF234e76a.TMP",
@@ -294,7 +311,6 @@
     "笔记大全(备份)/前端/Vue2课件.md",
     "笔记大全(备份)/前端/JavaScript教程.md",
     "笔记大全(备份)/前端/JavaScript教程 1.md",
-    "笔记大全(备份)/其他技术/git简单使用.md",
     "笔记大全(备份)/git简单使用 1.md",
     "最近笔记/Docker入门与项目部署.md",
     "最近笔记/Tomcat部署网页-虚拟机.md",
@@ -307,7 +323,6 @@
     "__wtest",
     "最近笔记/assets",
     "assets",
-    "Django框架.docx",
     "未命名.canvas"
   ]
 }
