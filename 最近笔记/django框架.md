@@ -110,7 +110,7 @@ $ tree
 |   |-- asgi.py  部署时才管
 |   |-- settings.py  天天改
 |   |-- urls.py  经常改
-|   -- wsgi.py   部署时才管
+|   |-- wsgi.py   部署时才管
 |-- manage.py  基本不动
 ```
 
