@@ -120,6 +120,7 @@ $ tree
 - manage.py: 一个实用的命令行工具，可让你以各种方式与该 Django 项目进行交互-----启动项目 创建项目 数据迁移。
 - \_init__.py: 一个空文件，告诉 Python 该目录是一个 Python 包。
 - asgi.py: 和项目发布有关，一个 ASGI 兼容的 Web 服务器的入口，以便运行你的项目。
+- wsgi.py: 和项目发布有关，一个 WSGI 兼容的 Web 服务器的入口，以便运行你的项目。
 - settings.py: 该 Django 项目的设置/配置（数据库、app 注册、密钥等,跨域处理）。
 ```apl
 settings.py 整个项目的控制面板。默认生成的东西里，学的时候重点盯这几个：
@@ -134,9 +135,25 @@ SECRET_KEY —— 加密签名用，别提交到 Git
 LANGUAGE_CODE / TIME_ZONE —— 想用中文界面和 Asia/Shanghai 就改这俩
 STATIC_URL —— 静态资源文件:Static files (CSS, JavaScript, Images)
 ```
-- urls.py: 该 Django 项目的 URL 声明; 一份由 Django 驱动的网站"目录"。MVT模式的url分发器的
-- wsgi.py: 和项目发布有关，一个 WSGI 兼容的 Web 服务器的入口，以便运行你的项目。
+- urls.py: 该 Django 项目的 URL 声明; 一份由 Django 驱动的网站"目录"。MVT模式的url分发器的实现,用户访问一个path,这个请求由urls.py接受并分发到到对应的views.py的逻辑中
 
+```
+浏览器请求 /blog/3/
+   ↓
+WSGI/ASGI server（runserver 内置的那个）
+   ↓
+中间件链（request 阶段，逐个过）
+   ↓
+URL resolver ← urls.py 在这里工作，匹配出 view
+   ↓
+View 函数/类（views.py）
+   ├─ 需要数据 → 调 Model → ORM → 数据库
+   └─ 要返回 HTML → render(request, 'x.html', context) → 模板引擎
+   ↓
+中间件链（response 阶段，倒序过）
+   ↓
+HttpResponse 回浏览器
+```
 ## 快速上手
 
 编辑url.py文件
