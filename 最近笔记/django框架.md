@@ -119,10 +119,22 @@ $ tree
 - HelloWorld: 项目的容器。
 - manage.py: 一个实用的命令行工具，可让你以各种方式与该 Django 项目进行交互-----启动项目 创建项目 数据迁移。
 - \_init__.py: 一个空文件，告诉 Python 该目录是一个 Python 包。
-- asgi.py: 一个 ASGI 兼容的 Web 服务器的入口，以便运行你的项目。
-- settings.py: 该 Django 项目的设置/配置。
+- asgi.py: 和项目发布有关，一个 ASGI 兼容的 Web 服务器的入口，以便运行你的项目。
+- settings.py: 该 Django 项目的设置/配置（数据库、app 注册、密钥等,跨域处理）。
+```apl
+settings.py 整个项目的控制面板。默认生成的东西里，学的时候重点盯这几个：
+
+INSTALLED_APPS —— 注册你的 app（写了 startapp blog，就得往这里加 'blog',就相当于一个个模块,APP文件,自带admin模块后台管理系统）
+MIDDLEWARE —— 中间件,后续可以自定义中间件,然后在这里注册
+DATABASES —— 数据库连接，默认 SQLite，就是个 db.sqlite3 文件
+TEMPLATES —— 模板目录配置
+ROOT_URLCONF = 'Django_demo.urls' —— 指向上面的 urls.py
+DEBUG = True —— 开发期开着，上线必须关
+SECRET_KEY —— 加密签名用，别提交到 Git
+LANGUAGE_CODE / TIME_ZONE —— 想用中文界面和 Asia/Shanghai 就改这俩
+```
 - urls.py: 该 Django 项目的 URL 声明; 一份由 Django 驱动的网站"目录"。
-- wsgi.py: 一个 WSGI 兼容的 Web 服务器的入口，以便运行你的项目。
+- wsgi.py: 和项目发布有关，一个 WSGI 兼容的 Web 服务器的入口，以便运行你的项目。
 
 ## 快速上手
 
