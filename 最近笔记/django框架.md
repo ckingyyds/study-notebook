@@ -187,12 +187,14 @@ from django.contrib import admin
 from django.urls import path  
 from django.http import HttpResponse
 
-# 编写一个请求处理函数
-def first(request):  
+# 编写一个请求处理函数,作为视图处理函数
+def first(request):  #参数建议写request
+#return一个响应对象
     return HttpResponse("<h1>这是我的第一个Django页面</h1>")  
   
 urlpatterns = [  
     path("admin/", admin.site.urls),  
+    #用户在访问/first_page/的时候,用first这个函数处理
     path("first_page/",first),  #前面引号里写的是路由,后面是调用方法(注意不要写括号)
 ]
 ```
@@ -216,7 +218,7 @@ urlpatterns = [
 
 ## 项目优化
 
-刚才是整个项目默认生成的根目录,不建议直接在这里写代码
+**刚才是整个项目默认生成的根目录,不建议直接在这里写代码,可以认为是一个全局配置文件**
 
 通过以上操作可以完成Django项目创建和请求处理，但之前项目中请求处理函数和请求映射编写在了同一个文件中，项目的管理不是特别的规范，特别是后续项目比较大的情况下，项目的管理不是特别方便。一般在创建Django项目时，会在Django项目中创建子项目app实现请求函数的编写
 
