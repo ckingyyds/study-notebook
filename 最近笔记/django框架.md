@@ -156,7 +156,30 @@ HttpResponse 回浏览器
 ```
 ## 快速上手
 
-编辑url.py文件
+## 启动初始项目
+
+先直接运行
+
+```python
+from django.contrib import admin  
+from django.urls import path  
+  
+urlpatterns = [  
+    path("admin/", admin.site.urls),  
+]
+```
+
+```bash  
+python manage.py runserver   #运行.或者点Pycharm的运行
+```
+
+
+
+![image6](assets/image6.png)
+
+
+
+编辑urls.py文件
 
 ```python
 from django.contrib import admin
@@ -173,19 +196,12 @@ urlpatterns = [
 ]
 ```
 
-## 启动项目
 
-```bash  
-python manage.py runserver 0.0.0.0:8080
-```
 
-![image6](assets/image6.png)
-
-0.0.0.0 让其它电脑可连接到开发服务器，8080 为端口号。如果不说明，那么端口号默认为 8000
-
-在浏览器输入你服务器的 ip（这里我们输入本机 IP 地址： **127.0.0.1:8000**） 及端口号，如果正常启动，输出结果如下：
+在浏览器输入你服务器的 ip（这里我们输入本机 IP 地址： **127.0.0.1/login**） 及端口号，如果正常启动，输出结果如下：
 
 ![image7](assets/image7.png)
+
 
 ## 项目优化
 
