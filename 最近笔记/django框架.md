@@ -188,12 +188,12 @@ from django.http import HttpResponse
 from django.urls import path
 
 # 编写一个请求处理函数
-def login(request):
-    return HttpResponse("<h1>Hello World!</h1>")
-
-urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("login/", login)
+def first(request):  
+    return HttpResponse("<h1>这是我的第一个Django页面</h1>")  
+  
+urlpatterns = [  
+    path("admin/", admin.site.urls),  
+    path("first_page/",first),  #前面是
 ]
 ```
 
@@ -208,11 +208,11 @@ urlpatterns = [
 
 这是理解 Django 路由的关键心智模型：
 
-| URLconf 状态            | 访问 `/` 时看到什么          | 说明                                 |
-| --------------------- | --------------------- | ---------------------------------- |
-| `urlpatterns = []`（空） | 🚀 火箭欢迎页              | Django 说"你啥也没配，先看看文档"              |
-| 有路由，但 `/` 没匹配上        | 🟡 技术 404 调试页（你上一张截图） | 列出了 tried 的所有 pattern，告诉你"空路径没匹配上" |
-| 有路由，且 `/` 匹配上了        | 你自己的页面                | 正常渲染视图返回的内容                        |
+| URLconf 状态                       | 访问 `/` 时看到什么          | 说明                                 |
+| -------------------------------- | --------------------- | ---------------------------------- |
+| `urlpatterns = []`（空,或者有初始admin） | 🚀 火箭欢迎页              | Django 说"你啥也没配，先看看文档"              |
+| 有路由，但 浏览器`/` 没匹配上                | 🟡 技术 404 调试页（你上一张截图） | 列出了 tried 的所有 pattern，告诉你"空路径没匹配上" |
+| 有路由，且 浏览器`/` 匹配上了                | 你自己写的页面               | 正常渲染视图返回的内容                        |
 
 ## 项目优化
 
