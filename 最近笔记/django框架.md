@@ -171,7 +171,7 @@ urlpatterns = [
 ```
 
 ```bash  
-python manage.py runserver   #运行.或者点Pycharm的运行
+python manage.py runserver   #运行.或者点Pycharm的运行,默认8000端口
 ```
 
 它的本质是：**一个"空路由表"友好提示页**，是 404 处理流程里的一个特例。它没有业务含义，也不会成为你网站的首页。
