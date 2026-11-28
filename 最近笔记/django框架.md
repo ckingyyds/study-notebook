@@ -126,14 +126,15 @@ settings.py 整个项目的控制面板。默认生成的东西里，学的时�
 
 INSTALLED_APPS —— 注册你的 app（写了 startapp blog，就得往这里加 'blog',就相当于一个个模块,APP文件,自带admin模块后台管理系统）
 MIDDLEWARE —— 中间件,后续可以自定义中间件,然后在这里注册
-DATABASES —— 数据库连接，默认 SQLite，就是个 db.sqlite3 文件
-TEMPLATES —— 模板目录配置
-ROOT_URLCONF = 'Django_demo.urls' —— 指向上面的 urls.py
+DATABASES —— 数据库连接配置，默认 SQLite，就是个 db.sqlite3 文件
+TEMPLATES —— 模板目录配置,后续在DIRS里填充模板
+ROOT_URLCONF = 'djangoproject.urls' —— 指向上面的 urls.py
 DEBUG = True —— 开发期开着，上线必须关
 SECRET_KEY —— 加密签名用，别提交到 Git
 LANGUAGE_CODE / TIME_ZONE —— 想用中文界面和 Asia/Shanghai 就改这俩
+STATIC_URL —— 静态资源文件:Static files (CSS, JavaScript, Images)
 ```
-- urls.py: 该 Django 项目的 URL 声明; 一份由 Django 驱动的网站"目录"。
+- urls.py: 该 Django 项目的 URL 声明; 一份由 Django 驱动的网站"目录"。MVT模式的url分发器的
 - wsgi.py: 和项目发布有关，一个 WSGI 兼容的 Web 服务器的入口，以便运行你的项目。
 
 ## 快速上手
