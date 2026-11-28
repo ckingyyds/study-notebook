@@ -183,9 +183,9 @@ python manage.py runserver   #运行.或者点Pycharm的运行
 编辑urls.py文件,配置路由(也就是地址)
 
 ```python
-from django.contrib import admin
+from django.contrib import admin  
+from django.urls import path  
 from django.http import HttpResponse
-from django.urls import path
 
 # 编写一个请求处理函数
 def first(request):  
@@ -193,16 +193,16 @@ def first(request):
   
 urlpatterns = [  
     path("admin/", admin.site.urls),  
-    path("first_page/",first),  #前面是
+    path("first_page/",first),  #前面引号里写的是路由,后面是调用方法(注意不要写括号)
 ]
 ```
 
 
 
-在浏览器输入你服务器的 ip（这里我们输入本机 IP 地址/路由： **127.0.0.1/login**） 及端口号，如果正常启动，输出结果如下：
+在浏览器输入你服务器的 ip（这里我们输入本机 IP 地址/路由： **127.0.0.1/first_page**） 及端口号，如果正常启动，输出结果如下：
 
 ![image7](assets/image7.png)
-这时候输入127.0.0.1,不会出现小火箭了,因为配置了urls.py,你一旦写了任何一条 `path(...)`，URLconf 就不空了，火箭页的触发条件就消失了，永远不会再出现。**它是一次性的**——只属于"刚装完、还没开始"的那个瞬间。,就不会再出现小火箭首页
+这时候输入127.0.0.1,不会出现小火箭了,反而会报404,因为配置了urls.py,你一旦写了任何一条 `path(...)`，URLconf 就不空了，火箭页的触发条件就消失了，永远不会再出现。**它是一次性的**——只属于"刚装完、还没开始"的那个瞬间。,就不会再出现小火箭首页
 
  **三种状态，三种结果**
 
